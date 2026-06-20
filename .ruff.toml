@@ -1,0 +1,20 @@
+target-version = "py313"
+
+# Allow lines to be as long as 150.
+line-length = 150
+
+[lint]
+select = [
+    "ALL",
+]
+
+ignore = [
+    "ANN001", # Missing type annotation for function argument
+    "ANN401", # Dynamically typed expressions (typing.Any) are disallowed
+    "D203", # no-blank-line-before-class (incompatible with formatter)
+    "D212", # multi-line-summary-first-line (incompatible with formatter)
+    "FIX002", # Line contains TODO, consider resolving an issue
+    "TD003", # Missing issue link on the line following this TODO
+    "TRY003", # Avoid specifying long messages outside the exception class
+    "LOG015" # info() call on root logger
+]
