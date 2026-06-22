@@ -10,12 +10,14 @@
 
 #include <algorithm>
 #include <cctype>
-#include <soc/soc_caps.h>
 
 #if defined(USE_ESP32)
+#include <soc/soc_caps.h>
 #include <lwip/netdb.h>
-#elif defined(USE_ESP8266)
-#include <netdb.h>
+#endif
+
+#if defined(USE_ESP8266)
+#include "esphome/components/http_request/http_request.h"
 #endif
 
 namespace esphome::duco {
@@ -53,7 +55,7 @@ void Duco::loop() {
     this->configuration->is_ready = false;
     return;
   }
-    
+
   uint32_t current_time = millis();
   if (current_time - this->last_check_time_ >= CHECK_INTERVAL) {
     this->last_check_time_ = current_time;
@@ -78,11 +80,13 @@ void Duco::loop() {
 
 void Duco::start() {
   this->job[0] = new MiningJob(0, this->configuration, this);
+#if defined(ESP32)
   xTaskCreatePinnedToCore(Duco::duco_thread_entry, "Miner/0", 10000, (void *) this->job[0], 1, &this->miner1_handle, 0);
 
 #if (SOC_CPU_CORES_NUM >= 2)
   this->job[1] = new MiningJob(1, this->configuration, this);
   xTaskCreatePinnedToCore(Duco::duco_thread_entry, "Miner/1", 10000, (void *) this->job[1], 1, &this->miner2_handle, 1);
+#endif
 #endif
 
   ESP_LOGCONFIG(TAG, "Duco started...");
@@ -93,7 +97,7 @@ void Duco::stop() {
     this->configuration->is_ready = false;
   }
 
-#if defined(ESP32)
+#if defined(USE_ESP32)
   if (this->miner1_handle != nullptr) {
     vTaskDelete(this->miner1_handle);
     this->miner1_handle = nullptr;
@@ -107,12 +111,12 @@ void Duco::stop() {
 
   vTaskDelay(pdMS_TO_TICKS(50));
 
-#elif defined(ESP8266)
+#elif defined(USE_ESP8266)
   if (this->job[0] != nullptr) {
     delete this->job[0];
     this->job[0] = nullptr;
   }
-  esphome::delay(50);   
+  esphome::delay(50);
 #endif
 
   ESP_LOGCONFIG(TAG, "Duco stopped.");
@@ -133,13 +137,14 @@ void Duco::dump_config() {
   LOG_SENSOR("  ", "Share rate", this->share_rate_);
   LOG_SENSOR("  ", "Accept rate", this->accept_rate_);
   LOG_SENSOR("  ", "Ping", this->ping_);
-#endif  
+#endif
 #ifdef USE_TEXTSENSOR
   LOG_SENSOR("  ", "Pool", this->pool_);
   LOG_SENSOR("  ", "Cores status", this->cores_status_);
 #endif
 }  // dump_config()
 
+#if defined(USE_ESP32)
 void Duco::duco_thread_entry(void *params) {
   if (params == nullptr) {
     vTaskDelete(nullptr);
@@ -155,7 +160,9 @@ void Duco::duco_thread_entry(void *params) {
 
   vTaskDelete(NULL);
 }  // duco_function()
+#endif
 
+#if defined(USE_ESP32)
 bool Duco::fetch_pool_node() {
   ESP_LOGI(TAG, "Fetching active node from Poolpicker...");
   this->configuration->is_ready = false;
@@ -325,10 +332,56 @@ bool Duco::fetch_pool_node() {
 
   return parse_success;
 }
+#endif
+
+#if defined(USE_ESP8266)
+bool Duco::fetch_pool_node() {
+  ESP_LOGI(TAG, "Fetching active node from Poolpicker...");
+  this->configuration->is_ready = false;
+
+  if (this->http_request_comp_ == nullptr) {
+    ESP_LOGE(TAG, "http_request reference is missing.");
+    return false;
+  }
+
+  std::vector<esphome::http_request::Header> headers;
+  esphome::http_request::Header accept_header;
+  accept_header.name = "Accept";
+  accept_header.value = "application/json";
+  headers.push_back(accept_header);
+
+  std::string url = "https://server.duinocoin.com/getPool";
+  auto container = this->http_request_comp_->get(url, headers);
+  if (container == nullptr)
+    return false;
+
+  std::string json_body = "";
+  uint8_t recv_buffer[128];
+  int bytes_read = 0;
+
+  while ((bytes_read = container->read(recv_buffer, sizeof(recv_buffer) - 1)) > 0) {
+    json_body.append(reinterpret_cast<char *>(recv_buffer), bytes_read);
+    if (json_body.length() > 3072)
+      return false;
+  }
+
+  if (json_body.empty())
+    return false;
+
+  return esphome::json::parse_json(json_body, [this](JsonObject root) -> bool {
+    if (root["ip"].is<JsonVariant>() && root["port"].is<JsonVariant>()) {
+      this->configuration->host = root["ip"].as<std::string>();
+      this->configuration->port = root["port"].as<uint16_t>();
+      this->configuration->node_id = root["name"].is<JsonVariant>() ? root["name"].as<std::string>() : "DucoNode";
+      this->configuration->is_ready = true;
+      return true;
+    }
+    return false;
+  });
+}
+#endif
 
 void Duco::generate_identifier() {
-  std::string auto_rig_name = "";
-
   this->configuration->chip_id = esphome::str_upper_case(esphome::get_mac_address());
   if (this->configuration->RIG_IDENTIFIER != "Auto")
     return;
@@ -338,8 +391,6 @@ void Duco::generate_identifier() {
 #else
   this->configuration->RIG_IDENTIFIER = "ESP32-" + this->configuration->chip_id;
 #endif
-
-  this->configuration->RIG_IDENTIFIER = auto_rig_name;
 }
 
 void Duco::on_share_found_callback() {
@@ -369,7 +420,11 @@ void Duco::check_for_problem() {
 
 void Duco::update_sensors() {
   uint32_t current_time = millis();
+#if defined(USE_ESP32)
   bool is_system_ready = this->configuration->is_ready.load(std::memory_order_relaxed);
+#elif defined(USE_ESP8266)
+  bool is_system_ready = this->configuration->is_ready;
+#endif
 
 #ifdef USE_BINARY_SENSOR
   if (this->status_ != nullptr && this->status_->state != is_system_ready) {
@@ -381,23 +436,23 @@ void Duco::update_sensors() {
     this->last_sensor_update_ = current_time;
 
 #ifdef USE_TEXT_SENSOR
-  if (this->cores_status_ != nullptr) {
-    std::string current_cores_status = "";
-    current_cores_status.reserve(SOC_CPU_CORES_NUM); 
+    if (this->cores_status_ != nullptr) {
+      std::string current_cores_status = "";
+      current_cores_status.reserve(SOC_CPU_CORES_NUM);
 
-    for (int i = 0; i < SOC_CPU_CORES_NUM; i++) {
-      if (this->job[i] == nullptr) {
-        current_cores_status += "-";
-      } else if (this->job[i]->problem()) {
-        current_cores_status += "X";
-      } else {
-        current_cores_status += "*";
+      for (int i = 0; i < SOC_CPU_CORES_NUM; i++) {
+        if (this->job[i] == nullptr) {
+          current_cores_status += "-";
+        } else if (this->job[i]->problem()) {
+          current_cores_status += "X";
+        } else {
+          current_cores_status += "*";
+        }
+      }
+      if (this->cores_status_->state != current_cores_status) {
+        this->cores_status_->publish_state(current_cores_status);
       }
     }
-    if (this->cores_status_->state != current_cores_status) {
-      this->cores_status_->publish_state(current_cores_status);
-    }
-  }
 #endif
 
 #ifdef USE_SENSOR
@@ -422,16 +477,31 @@ void Duco::update_sensors() {
 
     for (int i = 0; i < SOC_CPU_CORES_NUM; i++) {
       if (this->job[i] != nullptr) {
-        total_hashrate     += this->job[i]->hashrate.load(std::memory_order_relaxed);
-        total_accepted     += this->job[i]->accepted_share_count.load(std::memory_order_relaxed);
+#if defined(USE_ESP32)
+        total_hashrate += this->job[i]->hashrate.load(std::memory_order_relaxed);
+        total_accepted += this->job[i]->accepted_share_count.load(std::memory_order_relaxed);
         total_shares_count += this->job[i]->share_count.load(std::memory_order_relaxed);
-        
+
         uint32_t j_ping = this->job[i]->ping.load(std::memory_order_relaxed);
-        if (j_ping > max_ping) max_ping = j_ping;
+        if (j_ping > max_ping)
+          max_ping = j_ping;
 
         if (current_diff == 0) {
           current_diff = this->job[i]->difficulty.load(std::memory_order_relaxed);
         }
+#elif defined(USE_ESP8266)
+        total_hashrate += this->job[i]->hashrate;
+        total_accepted += this->job[i]->accepted_share_count;
+        total_shares_count += this->job[i]->share_count;
+
+        uint32_t j_ping = this->job[i]->ping;
+        if (j_ping > max_ping)
+          max_ping = j_ping;
+
+        if (current_diff == 0) {
+          current_diff = this->job[i]->difficulty;
+        }
+#endif
       }
     }
 
@@ -467,7 +537,7 @@ void Duco::update_sensors() {
         this->share_rate_->publish_state(0);
       }
     }
-#endif // USE_SENSOR
+#endif  // USE_SENSOR
   }
 }
 

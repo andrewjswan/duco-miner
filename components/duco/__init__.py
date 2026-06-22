@@ -17,6 +17,7 @@ from esphome.components.esp32 import (
     VARIANT_ESP32S2,
     get_esp32_variant,
 )
+from esphome.components.http_request import CONF_HTTP_REQUEST_ID
 from esphome.const import (
     CONF_HUMIDITY,
     CONF_ID,
@@ -28,6 +29,7 @@ from esphome.const import (
 )
 from esphome.core import CORE
 from esphome.types import ConfigType
+
 from .const import CONF_CPU_TEMPERATURE
 
 single_core_variants = (
@@ -47,15 +49,23 @@ CODEOWNERS = ["@andrewjswan"]
 
 DEPENDENCIES = ["wifi"]
 
-AUTO_LOAD = ["duco", "socket"]
+
+def AUTO_LOAD() -> list[str]:  # noqa: N802
+    """Conditionally auto-load socket only for ESP32."""
+    base = []
+    if CORE.is_esp32:
+        base.append("socket")
+    return base
+
 
 logging.info("Load Duino Coin Miner (Duco) component https://github.com/andrewjswan/esphome-components")
 logging.info("If you like the Duino Coin Miner (Duco) component, you can support it with a star ⭐ on GitHub.")
 
+http_request_ns = cg.esphome_ns.namespace("http_request")
+HttpRequestComponent = http_request_ns.class_("HttpRequestComponent", cg.Component)
+
 duco_ns = cg.esphome_ns.namespace("duco")
 DucoComponent = duco_ns.class_("Duco", cg.Component)
-
-CONF_CPU_TEMPERATURE = "cpu_temperature"
 
 
 def _consume_sockets(config: ConfigType) -> ConfigType:
@@ -71,22 +81,33 @@ def _consume_sockets(config: ConfigType) -> ConfigType:
     return config
 
 
-CONFIG_SCHEMA = cv.All(
-    cv.Schema(
-        {
-            cv.Required(CONF_ID): cv.declare_id(DucoComponent),
-            cv.Required(CONF_USERNAME): cv.string,
-            cv.Required(CONF_KEY): cv.string,
-            cv.Optional(CONF_NAME, default="Auto"): cv.string,
-            cv.Optional(CONF_TEMPERATURE): cv.use_id(sensor),
-            cv.Optional(CONF_HUMIDITY): cv.use_id(sensor),
-            cv.Optional(CONF_CPU_TEMPERATURE): cv.use_id(sensor),
-            cv.Optional(CONF_ON_STATE): automation.validate_automation({}),
-        },
-    ).extend(cv.COMPONENT_SCHEMA),
-    _consume_sockets,
-    cv.only_on_esp32,
-)
+BASE_SCHEMA = cv.Schema(
+    {
+        cv.Required(CONF_ID): cv.declare_id(DucoComponent),
+        cv.Required(CONF_USERNAME): cv.string,
+        cv.Required(CONF_KEY): cv.string,
+        cv.Optional(CONF_NAME, default="Auto"): cv.string,
+        cv.Optional(CONF_TEMPERATURE): cv.use_id(sensor),
+        cv.Optional(CONF_HUMIDITY): cv.use_id(sensor),
+        cv.Optional(CONF_CPU_TEMPERATURE): cv.use_id(sensor),
+        cv.Optional(CONF_ON_STATE): automation.validate_automation({}),
+    },
+).extend(cv.COMPONENT_SCHEMA)
+
+if CORE.is_esp8266:
+    CONFIG_SCHEMA = cv.All(
+        BASE_SCHEMA.extend(
+            {
+                cv.GenerateID(CONF_HTTP_REQUEST_ID): cv.use_id(HttpRequestComponent),
+            },
+        ),
+        _consume_sockets,
+    )
+else:
+    CONFIG_SCHEMA = cv.All(
+        BASE_SCHEMA,
+        _consume_sockets,
+    )
 
 
 async def to_code(config) -> None:
@@ -103,23 +124,27 @@ async def to_code(config) -> None:
         cg.add_define("DUCO_START_DIFF", "ESP8266H")
         cg.add_define("DUCO_MINER_BANNER", "ESPHome ESP8266 Miner")
         logging.info("Banner: ESPHome ESP8266 Miner")
+        if CONF_HTTP_REQUEST_ID in config:
+            http_request_var = await cg.get_variable(config[CONF_HTTP_REQUEST_ID])
+            cg.add(var.set_http_request(http_request_var))
+
     elif CORE.is_esp32:
         if get_esp32_variant() in single_core_variants:
             cg.add_define("DUCO_START_DIFF", "ESP32S")
         else:
             cg.add_define("DUCO_START_DIFF", "ESP32")
         cg.add_define("DUCO_MINER_BANNER", "ESPHome " + get_esp32_variant() + " Miner")
-        logging.info("Banner: ESPHome " + get_esp32_variant() + " Miner")
+        logging.info("Banner: ESPHome %s Miner", get_esp32_variant())
 
-    if CONF_TEMPERATURE in config and config[CONF_TEMPERATURE]:
+    if config.get(CONF_TEMPERATURE):
         temp = await cg.get_variable(config[CONF_TEMPERATURE])
         cg.add(var.set_temperature_sensor(temp))
         logging.info(" [X] Temperature sensor")
-    if CONF_HUMIDITY in config and config[CONF_HUMIDITY]:
+    if config.get(CONF_HUMIDITY):
         hum = await cg.get_variable(config[CONF_HUMIDITY])
         cg.add(var.set_humidity_sensor(hum))
         logging.info(" [X] Humidity sensor")
-    if CONF_CPU_TEMPERATURE in config and config[CONF_CPU_TEMPERATURE]:
+    if config.get(CONF_CPU_TEMPERATURE):
         cputemp = await cg.get_variable(config[CONF_CPU_TEMPERATURE])
         cg.add(var.set_cputemp_sensor(cputemp))
         logging.info(" [X] CPU Temperature sensor")

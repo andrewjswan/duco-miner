@@ -10,6 +10,10 @@
 #include <atomic>
 #include <memory>
 
+#if defined(USE_ESP8266)
+#include <ESP8266WiFi.h>
+#endif
+
 namespace esphome::duco {
 
 inline constexpr int8_t ERROR_THRESHOLD = 55;
@@ -23,15 +27,27 @@ class MiningJob {
   ~MiningJob() { delete this->dsha1; }
 
   void mine();
-  bool problem() const { 
-    return this->errors.load(std::memory_order_relaxed) >= ERROR_THRESHOLD; 
+  bool problem() const {
+#if defined(USE_ESP32)
+    return this->errors.load(std::memory_order_relaxed) >= ERROR_THRESHOLD;
+#elif defined(USE_ESP8266)
+    return this->errors >= ERROR_THRESHOLD;
+#endif
   }
 
+#if defined(USE_ESP32)
   std::atomic<uint32_t> hashrate{0};
   std::atomic<uint32_t> difficulty{0};
   std::atomic<uint32_t> share_count{0};
   std::atomic<uint32_t> accepted_share_count{0};
   std::atomic<uint32_t> ping{0};
+#elif defined(USE_ESP8266)
+  uint32_t hashrate{0};
+  uint32_t difficulty{0};
+  uint32_t share_count{0};
+  uint32_t accepted_share_count{0};
+  uint32_t ping{0};
+#endif
 
  private:
   MiningConfig *config;
@@ -47,9 +63,18 @@ class MiningJob {
   uint8_t hashArray[20];
   uint8_t expected_hash[20];
 
+#if defined(USE_ESP32)
   std::unique_ptr<esphome::socket::Socket> client_sock{nullptr};
+#elif defined(USE_ESP8266)
+  WiFiClient client_sock;
+#endif
+
   bool is_connected{false};
+#if defined(USE_ESP32)
   std::atomic<uint32_t> errors{0};
+#elif defined(USE_ESP8266)
+  uint32_t errors{0};
+#endif
 
   void handleSystemEvents(void);
 

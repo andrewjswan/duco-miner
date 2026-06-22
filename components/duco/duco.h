@@ -19,10 +19,17 @@
 #include "esphome/components/ota/ota_backend.h"
 #endif
 
+#if defined(USE_ESP32)
 #include <atomic>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <soc/soc_caps.h>
+#endif
+
+#if defined(USE_ESP8266)
+#define SOC_CPU_CORES_NUM 1
+#include "esphome/components/http_request/http_request.h"
+#endif
 
 namespace esphome::duco {
 
@@ -94,6 +101,13 @@ class Duco : public Component
   void on_ota_global_state(ota::OTAState state, float progress, uint8_t error, ota::OTAComponent *comp) override;
 #endif
 
+#if defined(USE_ESP8266)
+  void set_http_request(http_request::HttpRequestComponent *http_request_comp) {
+    this->http_request_comp_ = http_request_comp;
+  }
+  http_request::HttpRequestComponent *get_http_request_comp() { return this->http_request_comp_; }
+#endif
+
   void check_for_problem();
 
   void on_share_found_callback();
@@ -136,7 +150,7 @@ class Duco : public Component
   uint32_t last_check_time_{0};
   uint32_t last_sensor_update_{0};
 
-#if defined(ESP32)
+#if defined(USE_ESP32)
   TaskHandle_t miner1_handle{nullptr};
   TaskHandle_t miner2_handle{nullptr};
 #endif
@@ -171,7 +185,13 @@ class Duco : public Component
   bool fetch_pool_node();
   void generate_identifier();
 
+#if defined(USE_ESP32)
   static void duco_thread_entry(void *params);
+#endif
+
+#if defined(USE_ESP8266)
+  http_request::HttpRequestComponent *http_request_comp_{nullptr};
+#endif
 
   CallbackManager<void()> share_found_callback;
 };  // Duco
