@@ -279,7 +279,7 @@ void MiningJob::submit(uint32_t counter, uint32_t hashrate, float elapsed_time_s
   reply += SEP_TOKEN;
   reply += DUCO_MINER_BANNER;
   reply += SPC_TOKEN;
-  reply += this->config->MINER_VER;
+  reply += DUCO_VERSION;
   reply += SEP_TOKEN;
   reply += this->config->RIG_IDENTIFIER;
   reply += SEP_TOKEN;
@@ -462,7 +462,7 @@ void MiningJob::submit(uint32_t counter, uint32_t hashrate, float elapsed_time_s
   reply += SEP_TOKEN;
   reply += DUCO_MINER_BANNER;
   reply += SPC_TOKEN;
-  reply += this->config->MINER_VER;
+  reply += DUCO_VERSION;
   reply += SEP_TOKEN;
   reply += this->config->RIG_IDENTIFIER;
   reply += SEP_TOKEN;
