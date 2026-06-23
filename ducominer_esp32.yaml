@@ -1,0 +1,22 @@
+substitutions:
+  device: "esp_ducominer"
+  name: "ducominer"
+  friendly_name: "Duco Miner"
+
+esp32:
+  variant: esp32
+  framework:
+    type: esp-idf
+
+dashboard_import:
+  package_import_url: github://andrewjswan/duco-miner/ducominer_esp32.yaml@main
+
+packages:
+  remote_package:
+    url: https://github.com/andrewjswan/duco-miner
+    files:
+      - packages/common.yaml
+      - packages/ducominer.yaml
+      - packages/esp32.yaml
+      - packages/http_ota.yaml
+    refresh: 1s
