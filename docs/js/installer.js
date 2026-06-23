@@ -1,6 +1,6 @@
 $(document).ready(function() {
     // Version
-    const url = "https://andrewjswan.github.io/matrix-lamp/manifest.json";
+    const url = "https://andrewjswan.github.io/duco-miner/manifest.json";
     $.getJSON(url).done(function(data) {
         $("#version").text(data.version);
     });
