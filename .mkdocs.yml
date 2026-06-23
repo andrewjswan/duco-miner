@@ -1,0 +1,124 @@
+# Project information
+site_name: ESPHome Duco Miner by Andrew J.Swan
+site_url: https://andrewjswan.github.io/duco-miner
+site_author: Andrew J.Swan
+site_description: >-
+  This repository provides a custom component for ESPHome that allows you to easily turn ESP32 and ESP8266 microcontrollers into energy-efficient Duino-Coin (DUCO) miners with with monitoring available through a Web interface or by integrating it directly into Home Assistant.
+
+# Repository
+repo_name: andrewjswan/duco-miner
+repo_url: https://github.com/andrewjswan/duco-miner
+remote_branch: documentation
+
+# Copyright
+copyright: Copyright &copy; Andrew J.Swan
+
+# Configuration
+theme:
+  name: material
+  favicon: img/favicon.png
+  icon:
+    logo: material/minecraft
+  features:
+    - navigation.tabs
+    - navigation.features
+    - navigation.path
+    - navigation.top
+    - toc.integrate
+    - search.suggest
+    - search.hightlight
+    - content.tabs.link
+    - content.code.annotate
+    - content.code.copy
+    - content.code.select
+  language: en
+  font:
+    text: Roboto
+    code: Roboto Mono
+  palette:
+    # Palette toggle for automatic mode
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+      primary: indigo
+      accent: indigo
+
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+      primary: indigo
+      accent: indigo
+
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+      primary: indigo
+      accent: indigo
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - codehilite
+  - md_in_html
+  - sane_lists
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.magiclink:
+      hide_protocol: true
+      repo_url_shortener: true
+      repo_url_shorthand: true
+      normalize_issue_symbols: true
+      user: andrewjswan
+      repo: matrix-lamp
+  - pymdownx.smartsymbols
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tasklist
+  - toc:
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+
+nav:
+  - Home: index.md
+  - Duco:
+      - Component: duco-component.md
+  - Additionals: additionals.md
+  - Firmware:
+      - DucoMiner: firmware.md
+  - Changelog: CHANGELOG.md
+
+extra:
+  #analytics:
+  #  provider: google
+  #  property: G-4S8QHJJ2B7
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/andrewjswan
+
+extra_css:
+  - stylesheets/table.css
+  - stylesheets/installer.css
+  - stylesheets/github.css
+
+plugins:
+  - social:
+      cards_layout: default/variant
+      cards_layout_options:
+        background_image: docs/img/back.png
+        background_color: transparent
