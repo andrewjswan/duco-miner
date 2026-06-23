@@ -46,7 +46,7 @@
 ## Advanced Users
 
 - The device is adoptable in the [ESPHome dashboard](https://my.home-assistant.io/redirect/supervisor_addon/?addon=5c53de3b_esphome&repository_url=https%3A%2F%2Fgithub.com%2Fesphome%2Fhome-assistant-addon)
-- The YAML configuration for additional boards and chips is available on [GitHub](https://github.com/andrewjswan/matrix-lamp)
+- The YAML configuration for additional boards and chips is available on [GitHub](https://github.com/andrewjswan/duco-miner)
 
 ---
 
