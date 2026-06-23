@@ -1,0 +1,4 @@
+web_server:
+  auth:
+    username: duco
+    password: duino.coin
