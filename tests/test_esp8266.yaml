@@ -1,0 +1,20 @@
+substitutions:
+  device: "test"
+  name: "test"
+  friendly_name: "DucoMiner - Test"
+
+esp8266:
+  # https://github.com/esphome/firmware/blob/main/esp-web-tools/esp8266.yaml
+  # board: esp01_1m
+  # board: d1_mini
+  board: nodemcuv2
+  restore_from_flash: false
+
+dashboard_import:
+  package_import_url: github://andrewjswan/svitlobot/tests/test_esp8266.yaml@main
+
+packages:
+  common: !include ../packages/common.yaml
+  duco: !include ../packages/ducominer.yaml
+  esp8266: !include ../packages/esp8266.yaml
+  http_ota: !include ../packages/http_ota.yaml
