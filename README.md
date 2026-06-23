@@ -21,6 +21,10 @@ This repository provides a custom component for [ESPHome](https://esphome.io/) t
 
 **This repository features** fully prepared **YAML configuration files** and **ready-made configurations** for various devices, enabling you to launch your mining setup in just a few clicks. All management features, hashrate statistics, accepted share counters, and thread diagnostics automatically integrate into your smart home dashboard without requiring any complex code editing.
 
+## Documentation
+
+[Duco Miner / Duco Component](https://andrewjswan.github.io/duco-miner/)
+
 ## 🤝 Support
 
 If you like the project, you can support it with a star ⭐ on GitHub.
