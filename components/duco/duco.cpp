@@ -56,6 +56,13 @@ void Duco::loop() {
     return;
   }
 
+  if ((this->username_ == nullptr || std::strlen(this->username_) == 0) ||
+      (this->worker_ == nullptr || std::strlen(this->worker_) == 0) ||
+      (this->key_ == nullptr || std::strlen(this->key_) == 0)) {
+    this->configuration->is_ready = false;
+    return;
+  }
+
   uint32_t current_time = millis();
   if (current_time - this->last_check_time_ >= CHECK_INTERVAL) {
     this->last_check_time_ = current_time;
@@ -143,6 +150,57 @@ void Duco::dump_config() {
   LOG_SENSOR("  ", "Cores status", this->cores_status_);
 #endif
 }  // dump_config()
+
+void Duco::update_config() {
+  // 1. Critical safety check: ensure the configuration structure itself is allocated.
+  // This completely eliminates any risk of Guru Meditation / Core Crash during boot cycles.
+  if (this->configuration == nullptr) {
+    ESP_LOGW(TAG, "Config sync aborted: 'configuration' is not initialized yet.");
+    return;
+  }
+
+  bool changed = false;
+
+  // 2. Safe check and sync for Username
+  // Verify that the incoming raw web string pointer is valid and contains data
+  if (this->username_ != nullptr && std::strlen(this->username_) > 0) {
+    if (this->configuration->DUCO_USER != this->username_) {
+      this->configuration->DUCO_USER = this->username_;
+      changed = true;
+      ESP_LOGI(TAG, "Config synced: Username set to %s", this->username_);
+    }
+  } else {
+    ESP_LOGD(TAG, "Config sync: Username is empty, keeping default.");
+  }
+
+  // 3. Safe check and sync for Miner Key
+  // Key can be legally empty on some pools, so we only guard against bad memory addresses
+  if (this->key_ != nullptr) {
+    if (this->configuration->MINER_KEY != this->key_) {
+      this->configuration->MINER_KEY = this->key_;
+      changed = true;
+      ESP_LOGI(TAG, "Config synced: Miner Key updated.");
+    }
+  }
+
+  // 4. Safe check and sync for Worker / Rig Identifier
+  if (this->worker_ != nullptr && std::strlen(this->worker_) > 0) {
+    if (this->configuration->RIG_IDENTIFIER != this->worker_) {
+      this->configuration->RIG_IDENTIFIER = this->worker_;
+      changed = true;
+      ESP_LOGI(TAG, "Config synced: Worker set to %s", this->worker_);
+    }
+  } else {
+    ESP_LOGD(TAG, "Config sync: Worker is empty, keeping default.");
+  }
+
+  // 5. Force miner socket session restart if any configuration parameter has mutated.
+  // This breaks the current TCP link and forces threads to trigger reconnect loops instantly.
+  if (changed) {
+    this->generate_identifier();
+    this->configuration->is_ready = false;
+  }
+}
 
 #if defined(USE_ESP32)
 void Duco::duco_thread_entry(void *params) {

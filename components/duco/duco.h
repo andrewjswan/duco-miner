@@ -40,7 +40,6 @@ struct MiningConfig {
   std::string DUCO_USER = "";
   std::string RIG_IDENTIFIER = "";
   std::string MINER_KEY = "";
-  std::string MINER_VER = DUCO_VERSION;
   uint16_t WALLET_ID = 0;
 
   std::string chip_id = "";
@@ -69,6 +68,7 @@ class Duco : public Component
   void loop() override;
 
   void dump_config() override;
+  void update_config();
 
   void set_username(const char *username) { this->username_ = username; }
   void set_key(const char *key) { this->key_ = key; }

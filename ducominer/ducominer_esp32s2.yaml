@@ -17,6 +17,7 @@ packages:
     files:
       - packages/common.yaml
       - packages/ducominer.yaml
+      - packages/configuration.yaml
       - packages/esp32.yaml
       - packages/http_ota.yaml
     refresh: 1s

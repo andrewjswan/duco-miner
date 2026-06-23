@@ -14,5 +14,6 @@ dashboard_import:
 packages:
   common: !include ../packages/common.yaml
   duco: !include ../packages/ducominer.yaml
+  config: !include ../packages/configuration.yaml
   esp32: !include ../packages/esp32.yaml
   http_ota: !include ../packages/http_ota.yaml
