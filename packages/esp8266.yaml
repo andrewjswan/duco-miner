@@ -1,5 +1,5 @@
 substitutions:
-  comment: "ESPHome DucoMiner"
+  comment: "ESPHome DucoMiner | ESP8266"
 
 wifi:
   min_auth_mode: WPA2
