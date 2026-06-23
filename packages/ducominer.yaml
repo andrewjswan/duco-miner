@@ -1,6 +1,6 @@
 substitutions:
-  duco_user: "-"
-  duco_key: "-"
+  duco_user: ""
+  duco_key: ""
   worker_name: "Auto"
 
 external_components:
@@ -16,35 +16,48 @@ duco:
   key: "${duco_key}"
   name: "${worker_name}"
 
-sensor:
-  - platform: duco
-    hashrate:
-      name: "Hashrate"
-      web_server:
-        sorting_weight: 2
-    accepted_shares:
-      name: "Accepted shares"
-      web_server:
-        sorting_weight: 3
-    total_shares:
-      name: "Total shares"
-      web_server:
-        sorting_weight: 4
-    accept_rate:
-      name: "Accept rate"
-      web_server:
-        sorting_weight: 5
+web_server:
+  version: 3
+  sorting_groups:
+    - id: duco_group
+      name: "Duco Miner"
+      sorting_weight: -5
 
 binary_sensor:
   - platform: duco
     status:
       name: "Miner status"
       web_server:
-        sorting_weight: 1
+        sorting_group_id: duco_group
+        sorting_weight: 0
+
+sensor:
+  - platform: duco
+    hashrate:
+      name: "Hashrate"
+      web_server:
+        sorting_group_id: duco_group
+        sorting_weight: 3
+    accepted_shares:
+      name: "Accepted shares"
+      web_server:
+        sorting_group_id: duco_group
+        sorting_weight: 4
+    total_shares:
+      name: "Total shares"
+      web_server:
+        sorting_group_id: duco_group
+        sorting_weight: 5
+    accept_rate:
+      name: "Accept rate"
+      web_server:
+        sorting_group_id: duco_group
+        sorting_weight: 6
 
 text_sensor:
   - platform: duco
     cores_status:
       name: "Cores status"
       web_server:
-        sorting_weight: 2
+        sorting_group_id: duco_group
+        sorting_weight: 7
