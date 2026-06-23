@@ -1,0 +1,18 @@
+substitutions:
+  device: "test"
+  name: "test"
+  friendly_name: "DucoMiner - Test"
+
+esp32:
+  variant: esp32
+  framework:
+    type: esp-idf
+
+dashboard_import:
+  package_import_url: github://andrewjswan/duco-mine/tests/test_esp32_arduino.yaml@main
+
+packages:
+  common: !include ../packages/common.yaml
+  duco: !include ../packages/ducominer.yaml
+  esp32: !include ../packages/esp32.yaml
+  http_ota: !include ../packages/http_ota.yaml
