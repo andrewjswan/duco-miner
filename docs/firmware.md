@@ -32,7 +32,7 @@
       value=""
       checked
     />
-    <img src="../img/duco-miner" alt="Duco Miner" />
+    <img src="../img/duco-miner.png" alt="Duco Miner" />
     <span></span>
   </label>
 </div>
