@@ -1,0 +1,87 @@
+text:
+  - platform: template
+    name: "Duco Username"
+    id: duco_username_text
+    optimistic: true
+    min_length: 0
+    max_length: 32
+    mode: text
+    restore_value: true
+    icon: "mdi:account"
+    entity_category: config
+    disabled_by_default: true
+    web_server:
+      sorting_group_id: duco_group
+      sorting_weight: 1
+    on_value:
+      then:
+        - lambda: |-
+            if (!x.empty()) {
+              id(miner).set_username(x.c_str());
+              id(miner).update_config();
+            } else {
+              ESP_LOGD("duco", "Web UI: Username is empty, change ignored.");
+            }
+
+  - platform: template
+    name: "Duco Miner Key"
+    id: duco_key_text
+    optimistic: true
+    min_length: 0
+    max_length: 64
+    mode: text
+    restore_value: true
+    icon: "mdi:key-chain-variant"
+    entity_category: config
+    disabled_by_default: true
+    web_server:
+      sorting_group_id: duco_group
+      sorting_weight: 2
+    on_value:
+      then:
+        - lambda: |-
+            id(miner).set_key(x.c_str());
+            id(miner).update_config();
+
+  - platform: template
+    name: "Duco Miner Name"
+    id: duco_worker_text
+    optimistic: true
+    min_length: 0
+    max_length: 32
+    mode: text
+    restore_value: true
+    icon: "mdi:cpu"
+    entity_category: config
+    disabled_by_default: true
+    web_server:
+      sorting_group_id: duco_group
+      sorting_weight: 3
+    on_value:
+      then:
+        - lambda: |-
+            if (!x.empty()) {
+              id(miner).set_worker(x.c_str());
+              id(miner).update_config();
+            } else {
+              ESP_LOGD("duco", "Web UI: Rig Identifier is empty, change ignored.");
+            }
+
+esphome:
+  on_boot:
+    priority: -100.0
+    then:
+      - delay: 5s
+      - lambda: |-
+          std::string stored_user = id(duco_username_text).state;
+          std::string stored_key = id(duco_key_text).state;
+          std::string stored_rig = id(duco_worker_text).state;
+
+          if (!stored_user.empty()) {
+            id(miner).set_username(stored_user.c_str());
+          }
+          id(miner).set_key(stored_key.c_str());
+          if (!stored_rig.empty()) {
+            id(miner).set_worker(stored_rig.c_str());
+          }
+          id(miner).update_config();
