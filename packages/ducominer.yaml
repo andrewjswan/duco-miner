@@ -29,7 +29,7 @@ binary_sensor:
       name: "Miner status"
       web_server:
         sorting_group_id: duco_group
-        sorting_weight: 0
+        sorting_weight: -1
 
 sensor:
   - platform: duco
