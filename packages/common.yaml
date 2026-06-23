@@ -1,0 +1,96 @@
+esphome:
+  name: "${name}"
+  friendly_name: "${friendly_name}"
+  # name_add_mac_suffix: true
+  comment: $comment
+  build_path: ./.build/$device
+  project:
+    name: "${project_name}"
+    version: "${project_version}"
+
+api:
+  reboot_timeout: 0s
+
+ota:
+  - platform: esphome
+  - platform: web_server
+
+logger:
+  level: INFO
+
+mdns:
+  disabled: false
+
+web_server:
+  id: esp_web
+  port: 80
+  log: true
+  ota: false
+  version: 3
+
+wifi:
+  id: esp_wifi
+  ap: {}
+
+captive_portal:
+
+improv_serial:
+
+debug:
+  update_interval: never
+
+sensor:
+  - platform: uptime
+    name: "Uptime"
+    entity_category: diagnostic
+
+  - platform: wifi_signal
+    name: "WiFi Signal"
+    id: wifi_signal_dbm
+    entity_category: diagnostic
+    icon: mdi:signal
+
+button:
+  - platform: restart
+    name: "Restart"
+    id: Restart
+    entity_category: diagnostic
+    icon: mdi:restart
+
+  - platform: factory_reset
+    name: "Restart with Factory Default Settings"
+    id: Reset
+    entity_category: diagnostic
+    disabled_by_default: true
+
+text_sensor:
+  - platform: version
+    name: "ESPHome Version"
+    icon: mdi:new-box
+    hide_timestamp: true
+    hide_hash: true
+    entity_category: diagnostic
+
+  - platform: debug
+    reset_reason:
+      name: "Reset Reason"
+      disabled_by_default: true
+      entity_category: diagnostic
+
+  - platform: wifi_info
+    ip_address:
+      name: "IP Address"
+      id: ip_address
+      disabled_by_default: true
+      entity_category: diagnostic
+      icon: mdi:ip
+    ssid:
+      name: "Connected SSID"
+      disabled_by_default: true
+      entity_category: diagnostic
+      icon: mdi:access-point-network
+    mac_address:
+      name: "Mac Address"
+      disabled_by_default: true
+      entity_category: diagnostic
+      icon: mdi:console-network

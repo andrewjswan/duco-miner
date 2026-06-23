@@ -1,0 +1,10 @@
+substitutions:
+  comment: "ESPHome DucoMiner"
+
+wifi:
+  min_auth_mode: WPA2
+
+http_request:
+  timeout: 10s
+  tls_buffer_size_rx: 16384
+  verify_ssl: false
