@@ -68,6 +68,7 @@ class Duco : public Component
   void loop() override;
 
   void dump_config() override;
+  void update_config();
 
   void set_username(const char *username) { this->username_ = username; }
   void set_key(const char *key) { this->key_ = key; }
