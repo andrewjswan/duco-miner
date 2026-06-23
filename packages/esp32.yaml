@@ -6,8 +6,7 @@ wifi:
   enable_rrm: true
 
 duco:
-  - id: !extend miner
-    cpu_temperature: esp_temperature
+  cpu_temperature: esp_temperature
 
 sensor:
   - platform: internal_temperature
