@@ -56,6 +56,13 @@ void Duco::loop() {
     return;
   }
 
+  if ((this->username_ == nullptr || std::strlen(this->username_) == 0) ||
+      (this->worker_ == nullptr || std::strlen(this->worker_) == 0) ||
+      (this->key_ == nullptr || std::strlen(this->key_) == 0)) {
+    this->configuration->is_ready = false;
+    return;
+  }
+
   uint32_t current_time = millis();
   if (current_time - this->last_check_time_ >= CHECK_INTERVAL) {
     this->last_check_time_ = current_time;
