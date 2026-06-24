@@ -4,6 +4,10 @@ on:
   pull_request_target:
     types: [opened, edited]
 
+permissions:
+  issues: write
+  contents: read
+ 
 jobs:
   labeler:
     name: Add labels to Pull Request
@@ -11,6 +15,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+
       - name: Add labels to Pull Request
         uses: github/issue-labeler@v3.4
         with:
