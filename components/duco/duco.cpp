@@ -55,14 +55,14 @@ void Duco::loop() {
     this->configuration->is_ready = false;
     return;
   }
-
-  if ((this->username_ == nullptr || std::strlen(this->username_) == 0) ||
-      (this->worker_ == nullptr || std::strlen(this->worker_) == 0) ||
-      (this->key_ == nullptr || std::strlen(this->key_) == 0)) {
+  
+  if ((this->username_ == nullptr || strlen(this->username_) == 0) ||
+      (this->worker_ == nullptr || strlen(this->worker_) == 0) ||
+      (this->key_ == nullptr || strlen(this->key_) == 0)) {
     this->configuration->is_ready = false;
     return;
   }
-
+  
   uint32_t current_time = millis();
   if (current_time - this->last_check_time_ >= CHECK_INTERVAL) {
     this->last_check_time_ = current_time;
@@ -87,7 +87,7 @@ void Duco::loop() {
 
 void Duco::start() {
   this->job[0] = new MiningJob(0, this->configuration, this);
-#if defined(ESP32)
+#if defined(USE_ESP32)
   xTaskCreatePinnedToCore(Duco::duco_thread_entry, "Miner/0", 10000, (void *) this->job[0], 1, &this->miner1_handle, 0);
 
 #if (SOC_CPU_CORES_NUM >= 2)
@@ -115,9 +115,7 @@ void Duco::stop() {
     this->miner2_handle = nullptr;
   }
 #endif
-
   vTaskDelay(pdMS_TO_TICKS(50));
-
 #elif defined(USE_ESP8266)
   if (this->job[0] != nullptr) {
     delete this->job[0];
@@ -133,9 +131,14 @@ void Duco::dump_config() {
   ESP_LOGCONFIG(TAG, "Duco version: %s", DUCO_VERSION);
   ESP_LOGCONFIG(TAG, "      Worker: %s", this->configuration->RIG_IDENTIFIER.c_str());
   ESP_LOGCONFIG(TAG, "       Cores: %d", SOC_CPU_CORES_NUM);
+#ifdef OFFICIAL_VERSION
+  ESP_LOGCONFIG(TAG, "Mimicry mode: %s", OFFICIAL_VERSION);
+#endif
+
 #ifdef USE_BINARY_SENSOR
   LOG_BINARY_SENSOR("  ", "Status", this->status_);
 #endif
+
 #ifdef USE_SENSOR
   LOG_SENSOR("  ", "Accepted shares", this->accepted_shares_);
   LOG_SENSOR("  ", "Total shares", this->total_shares_);
@@ -145,6 +148,7 @@ void Duco::dump_config() {
   LOG_SENSOR("  ", "Accept rate", this->accept_rate_);
   LOG_SENSOR("  ", "Ping", this->ping_);
 #endif
+
 #ifdef USE_TEXTSENSOR
   LOG_SENSOR("  ", "Pool", this->pool_);
   LOG_SENSOR("  ", "Cores status", this->cores_status_);
@@ -232,7 +236,7 @@ bool Duco::fetch_pool_node() {
   hints.ai_socktype = SOCK_STREAM;
 
   const char *poolpicker_url = "server.duinocoin.com";
-  int err = getaddrinfo(poolpicker_url, nullptr, &hints, &res);
+  int16_t err = getaddrinfo(poolpicker_url, nullptr, &hints, &res);
   if (err != 0 || res == nullptr) {
     ESP_LOGW(TAG, "DNS Resolution failed for %s, error: %d", poolpicker_url, err);
     if (res != nullptr) {
@@ -262,7 +266,7 @@ bool Duco::fetch_pool_node() {
   freeaddrinfo(res);
 
   bool connected = false;
-  int conn_res = sock->connect((struct sockaddr *) &s_addr, sizeof(s_addr));
+  int16_t conn_res = sock->connect((struct sockaddr *) &s_addr, sizeof(s_addr));
 
   if (conn_res == 0) {
     ESP_LOGD(TAG, "Successfully connected to %s!", poolpicker_url);
@@ -272,9 +276,9 @@ bool Duco::fetch_pool_node() {
     pfd.fd = sock->get_fd();
     pfd.events = POLLOUT;
 
-    int ready = poll(&pfd, 1, 1500);
+    int16_t ready = poll(&pfd, 1, 1500);
     if (ready > 0) {
-      int so_error;
+      int16_t so_error;
       socklen_t len = sizeof(so_error);
       getsockopt(pfd.fd, SOL_SOCKET, SO_ERROR, &so_error, &len);
 
@@ -415,7 +419,7 @@ bool Duco::fetch_pool_node() {
 
   std::string json_body = "";
   uint8_t recv_buffer[128];
-  int bytes_read = 0;
+  int16_t bytes_read = 0;
 
   while ((bytes_read = container->read(recv_buffer, sizeof(recv_buffer) - 1)) > 0) {
     json_body.append(reinterpret_cast<char *>(recv_buffer), bytes_read);
@@ -443,12 +447,7 @@ void Duco::generate_identifier() {
   this->configuration->chip_id = esphome::str_upper_case(esphome::get_mac_address());
   if (this->configuration->RIG_IDENTIFIER != "Auto")
     return;
-
-#if defined(ESP8266)
-  this->configuration->RIG_IDENTIFIER = "ESP8266-" + this->configuration->chip_id;
-#else
-  this->configuration->RIG_IDENTIFIER = "ESP32-" + this->configuration->chip_id;
-#endif
+  this->configuration->RIG_IDENTIFIER = std::string(DUCO_CHIP) + "-" + this->configuration->chip_id;
 }
 
 void Duco::on_share_found_callback() {
@@ -461,7 +460,7 @@ void Duco::on_share_found_callback() {
 void Duco::check_for_problem() {
   bool should_restart = false;
 
-  for (int i = 0; i < SOC_CPU_CORES_NUM; i++) {
+  for (uint8_t i = 0; i < SOC_CPU_CORES_NUM; i++) {
     if (this->job[i] != nullptr) {
       if (this->job[i]->problem()) {
         ESP_LOGW(TAG, "Miner on Core[%d] has a problem!", i);
@@ -498,7 +497,7 @@ void Duco::update_sensors() {
       std::string current_cores_status = "";
       current_cores_status.reserve(SOC_CPU_CORES_NUM);
 
-      for (int i = 0; i < SOC_CPU_CORES_NUM; i++) {
+      for (uint8_t i = 0; i < SOC_CPU_CORES_NUM; i++) {
         if (this->job[i] == nullptr) {
           current_cores_status += "-";
         } else if (this->job[i]->problem()) {
@@ -527,13 +526,13 @@ void Duco::update_sensors() {
       return;
     }
 
-    uint32_t total_hashrate = 0;
-    uint32_t total_accepted = 0;
-    uint32_t total_shares_count = 0;
-    uint32_t max_ping = 0;
-    uint32_t current_diff = 0;
+    uint32_t total_hashrate = 0U;
+    uint32_t total_accepted = 0U;
+    uint32_t total_shares_count = 0U;
+    uint32_t max_ping = 0U;
+    uint32_t current_diff = 0U;
 
-    for (int i = 0; i < SOC_CPU_CORES_NUM; i++) {
+    for (uint8_t i = 0; i < SOC_CPU_CORES_NUM; i++) {
       if (this->job[i] != nullptr) {
 #if defined(USE_ESP32)
         total_hashrate += this->job[i]->hashrate.load(std::memory_order_relaxed);
@@ -544,7 +543,7 @@ void Duco::update_sensors() {
         if (j_ping > max_ping)
           max_ping = j_ping;
 
-        if (current_diff == 0) {
+        if (current_diff == 0U) {
           current_diff = this->job[i]->difficulty.load(std::memory_order_relaxed);
         }
 #elif defined(USE_ESP8266)

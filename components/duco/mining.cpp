@@ -229,7 +229,7 @@ void MiningJob::waitForClientData() {
     return;
 
   while (this->is_connected && this->client_sock) {
-    int res = this->client_sock->read(&c, 1);
+    int16_t res = this->client_sock->read(&c, 1);
 
     if (res > 0) {
       if (c == END_TOKEN) {
@@ -279,7 +279,11 @@ void MiningJob::submit(uint32_t counter, uint32_t hashrate, float elapsed_time_s
   reply += SEP_TOKEN;
   reply += DUCO_MINER_BANNER;
   reply += SPC_TOKEN;
+#ifdef OFFICIAL_VERSION
+  reply += OFFICIAL_VERSION;
+#else
   reply += DUCO_VERSION;
+#endif
   reply += SEP_TOKEN;
   reply += this->config->RIG_IDENTIFIER;
   reply += SEP_TOKEN;
@@ -290,7 +294,7 @@ void MiningJob::submit(uint32_t counter, uint32_t hashrate, float elapsed_time_s
 
   ESP_LOGD(TAG, "Core [%d] - Sending share to pool: %s", this->core, reply.c_str());
 
-  int sent_bytes = this->client_sock->send(reply.c_str(), reply.length(), 0);
+  int16_t sent_bytes = this->client_sock->send(reply.c_str(), reply.length(), 0);
 
   if (sent_bytes < 0) {
     ESP_LOGE(TAG, "Core [%d] - Failed to send share to pool.", this->core);
@@ -363,7 +367,7 @@ void MiningJob::askForJob() {
 
   job_req += END_TOKEN;
 
-  int sent_bytes = this->client_sock->send(job_req.c_str(), job_req.length(), 0);
+  int16_t sent_bytes = this->client_sock->send(job_req.c_str(), job_req.length(), 0);
 
   if (sent_bytes < 0) {
     ESP_LOGE(TAG, "Core [%d] - Failed to send job request to pool.", this->core);
@@ -462,7 +466,11 @@ void MiningJob::submit(uint32_t counter, uint32_t hashrate, float elapsed_time_s
   reply += SEP_TOKEN;
   reply += DUCO_MINER_BANNER;
   reply += SPC_TOKEN;
+#ifdef OFFICIAL_VERSION
+  reply += OFFICIAL_VERSION;
+#else
   reply += DUCO_VERSION;
+#endif
   reply += SEP_TOKEN;
   reply += this->config->RIG_IDENTIFIER;
   reply += SEP_TOKEN;
@@ -474,7 +482,7 @@ void MiningJob::submit(uint32_t counter, uint32_t hashrate, float elapsed_time_s
   ESP_LOGD(TAG, "Core [%d] - Sending share to pool: %s", this->core, reply.c_str());
 
   // Send raw string over the active lwIP stream layout
-  int sent_bytes = this->client_sock.write(reply.c_str(), reply.length());
+  int16_t sent_bytes = this->client_sock.write(reply.c_str(), reply.length());
   if (sent_bytes <= 0) {
     ESP_LOGE(TAG, "Core [%d] - Failed to submit share data", this->core);
     this->is_connected = false;
@@ -541,7 +549,7 @@ void MiningJob::askForJob() {
 
   job_req += END_TOKEN;
 
-  int sent_bytes = this->client_sock.write(job_req.c_str(), job_req.length());
+  int16_t sent_bytes = this->client_sock.write(job_req.c_str(), job_req.length());
   if (sent_bytes <= 0) {
     ESP_LOGE(TAG, "Core [%d] - Failed to request a new job from node", this->core);
     this->is_connected = false;

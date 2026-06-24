@@ -30,7 +30,7 @@ from esphome.const import (
 from esphome.core import CORE
 from esphome.types import ConfigType
 
-from .const import CONF_CPU_TEMPERATURE
+from .const import CONF_CPU_TEMPERATURE, CONF_ENABLE_MIMICRY
 
 single_core_variants = (
     VARIANT_ESP32C2,
@@ -90,6 +90,7 @@ BASE_SCHEMA = cv.Schema(
         cv.Optional(CONF_TEMPERATURE): cv.use_id(sensor),
         cv.Optional(CONF_HUMIDITY): cv.use_id(sensor),
         cv.Optional(CONF_CPU_TEMPERATURE): cv.use_id(sensor),
+        cv.Optional(CONF_ENABLE_MIMICRY, default=False): cv.boolean,
         cv.Optional(CONF_ON_STATE): automation.validate_automation({}),
     },
 ).extend(cv.COMPONENT_SCHEMA)
@@ -123,29 +124,43 @@ async def to_code(config) -> None:
     cg.add_define("USE_DUCO_MINER")
 
     if CORE.is_esp8266:
+        chip = "ESP8266"
+        variant = "ESP8266"
+        is_single_core = True
         cg.add_define("DUCO_START_DIFF", "ESP8266H")
-        cg.add_define("DUCO_MINER_BANNER", "ESPHome ESP8266 Miner")
-        logging.info("Banner: ESPHome ESP8266 Miner")
+        
         if CONF_HTTP_REQUEST_ID in config:
             http_request_var = await cg.get_variable(config[CONF_HTTP_REQUEST_ID])
             cg.add(var.set_http_request(http_request_var))
 
     elif CORE.is_esp32:
-        if get_esp32_variant() in single_core_variants:
-            cg.add_define("DUCO_START_DIFF", "ESP32S")
-        else:
-            cg.add_define("DUCO_START_DIFF", "ESP32")
-        cg.add_define("DUCO_MINER_BANNER", "ESPHome " + get_esp32_variant() + " Miner")
-        logging.info("Banner: ESPHome %s Miner", get_esp32_variant())
+        chip = "ESP32"
+        variant = get_esp32_variant()
+        is_single_core = variant in single_core_variants
+        cg.add_define("DUCO_START_DIFF", "ESP32S" if is_single_core else "ESP32")
+
+    if config[CONF_ENABLE_MIMICRY]:
+        cg.add_define("OFFICIAL_VERSION", "4.3")
+        logging.info(" [X] Mimicry mode")
+        suffix = "-S2" if (CORE.is_esp32 and is_single_core) else ""
+        banner = f"Official {chip}{suffix} Miner"
+    else:
+        banner = f"ESPHome {variant} Miner"
+
+    cg.add_define("DUCO_CHIP", chip)
+    cg.add_define("DUCO_MINER_BANNER", banner)
+    logging.info("Banner: %s", banner)
 
     if config.get(CONF_TEMPERATURE):
         temp = await cg.get_variable(config[CONF_TEMPERATURE])
         cg.add(var.set_temperature_sensor(temp))
         logging.info(" [X] Temperature sensor")
+
     if config.get(CONF_HUMIDITY):
         hum = await cg.get_variable(config[CONF_HUMIDITY])
         cg.add(var.set_humidity_sensor(hum))
         logging.info(" [X] Humidity sensor")
+
     if config.get(CONF_CPU_TEMPERATURE):
         cputemp = await cg.get_variable(config[CONF_CPU_TEMPERATURE])
         cg.add(var.set_cputemp_sensor(cputemp))

@@ -10,6 +10,7 @@ CONF_ACCEPTED_RATE = "accept_rate"
 CONF_PING = "ping"
 CONF_CORES_STATUS = "cores_status"
 CONF_POOL = "pool"
+CONF_ENABLE_MIMICRY = "enable_mimicry"
 
 UNIT_KILO_HASH_PER_SECOND = "KH/s"
 
