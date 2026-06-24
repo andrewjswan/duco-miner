@@ -120,6 +120,8 @@ async def to_code(config) -> None:
     cg.add(var.set_key(config[CONF_KEY]))
     cg.add(var.set_worker(config[CONF_NAME]))
 
+    cg.add_define("USE_DUCO_MINER")
+
     if CORE.is_esp8266:
         cg.add_define("DUCO_START_DIFF", "ESP8266H")
         cg.add_define("DUCO_MINER_BANNER", "ESPHome ESP8266 Miner")
