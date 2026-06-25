@@ -113,6 +113,22 @@ else:
     )
 
 
+FILTER_SOURCE_FILES = filter_source_files_from_platform(
+    {
+        "duco_esp32.cpp": {
+            PlatformFramework.ESP32_IDF,
+            PlatformFramework.ESP32_ARDUINO,
+        },
+        "mining_esp32.cpp": {
+            PlatformFramework.ESP32_IDF,
+            PlatformFramework.ESP32_ARDUINO,
+        },
+        "duco_esp8266.cpp": {PlatformFramework.ESP8266_ARDUINO},
+        "mining_esp8266.cpp": {PlatformFramework.ESP8266_ARDUINO},
+    },
+)
+
+
 async def to_code(config) -> None:
     """Code generation entry point."""
     var = cg.new_Pvariable(config[CONF_ID])
@@ -177,19 +193,3 @@ async def to_code(config) -> None:
             [],
             conf,
         )
-
-
-FILTER_SOURCE_FILES = filter_source_files_from_platform(
-    {
-        "duco_esp32.cpp": {
-            PlatformFramework.ESP32_IDF,
-            PlatformFramework.ESP32_ARDUINO,
-        },
-        "mining_esp32.cpp": {
-            PlatformFramework.ESP32_IDF,
-            PlatformFramework.ESP32_ARDUINO,
-        },
-        "duco_esp8266.cpp": {PlatformFramework.ESP8266_ARDUINO},
-        "mining_esp8266.cpp": {PlatformFramework.ESP8266_ARDUINO},
-    },
-)
