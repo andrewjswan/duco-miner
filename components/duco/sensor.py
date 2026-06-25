@@ -30,9 +30,6 @@ from .const import (
     UNIT_KILO_HASH_PER_SECOND,
 )
 
-DEPENDENCIES = ["duco"]
-
-
 CONFIG_SCHEMA = cv.Schema(
     {
         cv.GenerateID(): cv.use_id(DucoComponent),

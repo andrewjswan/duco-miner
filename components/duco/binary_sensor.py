@@ -13,9 +13,6 @@ from esphome.const import (
 from . import FILTER_SOURCE_FILES, DucoComponent  # noqa: F401
 from .const import ICON_MINECRAFT
 
-DEPENDENCIES = ["duco"]
-
-
 CONFIG_SCHEMA = cv.Schema(
     {
         cv.GenerateID(): cv.use_id(DucoComponent),

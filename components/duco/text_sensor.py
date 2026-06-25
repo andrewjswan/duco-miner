@@ -16,9 +16,6 @@ from .const import (
     ICON_WEB,
 )
 
-DEPENDENCIES = ["duco"]
-
-
 CONFIG_SCHEMA = cv.Schema(
     {
         cv.GenerateID(): cv.use_id(DucoComponent),
