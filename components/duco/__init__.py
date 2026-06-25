@@ -191,5 +191,5 @@ FILTER_SOURCE_FILES = filter_source_files_from_platform(
         },
         "duco_esp8266.cpp": {PlatformFramework.ESP8266_ARDUINO},
         "mining_esp8266.cpp": {PlatformFramework.ESP8266_ARDUINO},
-    }
+    },
 )
