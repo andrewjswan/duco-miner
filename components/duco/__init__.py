@@ -87,7 +87,7 @@ BASE_SCHEMA = cv.Schema(
     {
         cv.Required(CONF_ID): cv.declare_id(DucoComponent),
         cv.Required(CONF_USERNAME): cv.string,
-        cv.Required(CONF_KEY): cv.string,
+        cv.Required(CONF_KEY): cv.sensitive(cv.string),
         cv.Optional(CONF_NAME, default="Auto"): cv.string,
         cv.Optional(CONF_TEMPERATURE): cv.use_id(sensor),
         cv.Optional(CONF_HUMIDITY): cv.use_id(sensor),
