@@ -11,6 +11,10 @@
 
 namespace esphome::duco {
 
+bool MiningJob::problem() const {
+  return this->errors >= ERROR_THRESHOLD;
+}
+
 void MiningJob::handleSystemEvents(void) { esphome::App.feed_wdt(); }
 
 void MiningJob::connectToNode() {
