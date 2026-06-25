@@ -128,7 +128,7 @@ async def to_code(config) -> None:
         variant = "ESP8266"
         is_single_core = True
         cg.add_define("DUCO_START_DIFF", "ESP8266H")
-        
+
         if CONF_HTTP_REQUEST_ID in config:
             http_request_var = await cg.get_variable(config[CONF_HTTP_REQUEST_ID])
             cg.add(var.set_http_request(http_request_var))
