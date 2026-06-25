@@ -12,7 +12,7 @@ from esphome.const import (
     UNIT_PERCENT,
 )
 
-from . import DucoComponent
+from . import FILTER_SOURCE_FILES, DucoComponent  # noqa: F401
 from .const import (
     CONF_ACCEPTED_RATE,
     CONF_ACCEPTED_SHARES,
@@ -29,9 +29,6 @@ from .const import (
     ICON_VECTOR_DIFFERENCE,
     UNIT_KILO_HASH_PER_SECOND,
 )
-
-DEPENDENCIES = ["duco"]
-
 
 CONFIG_SCHEMA = cv.Schema(
     {

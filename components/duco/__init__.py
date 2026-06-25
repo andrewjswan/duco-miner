@@ -49,7 +49,15 @@ _LOGGER = logging.getLogger(__name__)
 
 CODEOWNERS = ["@andrewjswan"]
 
-DEPENDENCIES = ["wifi"]
+
+logging.info("Load Duino Coin Miner (Duco) component https://github.com/andrewjswan/duco-miner")
+logging.info("If you like the Duino Coin Miner (Duco) component, you can support it with a star ⭐ on GitHub.")
+
+http_request_ns = cg.esphome_ns.namespace("http_request")
+HttpRequestComponent = http_request_ns.class_("HttpRequestComponent", cg.Component)
+
+duco_ns = cg.esphome_ns.namespace("duco")
+DucoComponent = duco_ns.class_("Duco", cg.Component)
 
 
 def AUTO_LOAD() -> list[str]:  # noqa: N802
@@ -58,16 +66,6 @@ def AUTO_LOAD() -> list[str]:  # noqa: N802
     if CORE.is_esp32:
         base.append("socket")
     return base
-
-
-logging.info("Load Duino Coin Miner (Duco) component https://github.com/andrewjswan/esphome-components")
-logging.info("If you like the Duino Coin Miner (Duco) component, you can support it with a star ⭐ on GitHub.")
-
-http_request_ns = cg.esphome_ns.namespace("http_request")
-HttpRequestComponent = http_request_ns.class_("HttpRequestComponent", cg.Component)
-
-duco_ns = cg.esphome_ns.namespace("duco")
-DucoComponent = duco_ns.class_("Duco", cg.Component)
 
 
 def _consume_sockets(config: ConfigType) -> ConfigType:
@@ -111,6 +109,22 @@ else:
         BASE_SCHEMA,
         _consume_sockets,
     )
+
+
+FILTER_SOURCE_FILES = filter_source_files_from_platform(
+    {
+        "duco_esp32.cpp": {
+            PlatformFramework.ESP32_IDF,
+            PlatformFramework.ESP32_ARDUINO,
+        },
+        "mining_esp32.cpp": {
+            PlatformFramework.ESP32_IDF,
+            PlatformFramework.ESP32_ARDUINO,
+        },
+        "duco_esp8266.cpp": {PlatformFramework.ESP8266_ARDUINO},
+        "mining_esp8266.cpp": {PlatformFramework.ESP8266_ARDUINO},
+    },
+)
 
 
 async def to_code(config) -> None:
@@ -177,19 +191,3 @@ async def to_code(config) -> None:
             [],
             conf,
         )
-
-
-FILTER_SOURCE_FILES = filter_source_files_from_platform(
-    {
-        "duco_esp32.cpp": {
-            PlatformFramework.ESP32_IDF,
-            PlatformFramework.ESP32_ARDUINO,
-        },
-        "mining_esp32.cpp": {
-            PlatformFramework.ESP32_IDF,
-            PlatformFramework.ESP32_ARDUINO,
-        },
-        "duco_esp8266.cpp": {PlatformFramework.ESP8266_ARDUINO},
-        "mining_esp8266.cpp": {PlatformFramework.ESP8266_ARDUINO},
-    },
-)

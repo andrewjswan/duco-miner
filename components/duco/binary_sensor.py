@@ -10,11 +10,8 @@ from esphome.const import (
     ENTITY_CATEGORY_DIAGNOSTIC,
 )
 
-from . import DucoComponent
+from . import FILTER_SOURCE_FILES, DucoComponent  # noqa: F401
 from .const import ICON_MINECRAFT
-
-DEPENDENCIES = ["duco"]
-
 
 CONFIG_SCHEMA = cv.Schema(
     {
