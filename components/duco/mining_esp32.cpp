@@ -10,6 +10,10 @@
 
 namespace esphome::duco {
 
+bool MiningJob::problem() const {
+  return this->errors.load(std::memory_order_relaxed) >= ERROR_THRESHOLD;
+}
+
 void MiningJob::handleSystemEvents(void) {
   // Critical: Suspend the current thread for 10ms to let ESPHome run its automation loops.
   // pdMS_TO_TICKS(10) ensures that the tick-rate conversion is accurate across different ESP32 variants.
