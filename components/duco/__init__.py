@@ -188,7 +188,7 @@ FILTER_SOURCE_FILES = filter_source_files_from_platform(
             PlatformFramework.ESP32_IDF,
             PlatformFramework.ESP32_ARDUINO,
         },
-        
+
         "duco_esp8266.cpp": {
             PlatformFramework.ESP8266_ARDUINO
         },
