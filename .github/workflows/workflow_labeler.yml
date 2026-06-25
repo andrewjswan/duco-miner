@@ -7,7 +7,7 @@ on:
 permissions:
   issues: write
   contents: read
- 
+
 jobs:
   labeler:
     name: Add labels to Pull Request
