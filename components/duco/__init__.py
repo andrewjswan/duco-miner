@@ -18,6 +18,7 @@ from esphome.components.esp32 import (
     get_esp32_variant,
 )
 from esphome.components.http_request import CONF_HTTP_REQUEST_ID
+from esphome.config_helpers import filter_source_files_from_platform
 from esphome.const import (
     CONF_HUMIDITY,
     CONF_ID,
@@ -26,6 +27,7 @@ from esphome.const import (
     CONF_ON_STATE,
     CONF_TEMPERATURE,
     CONF_USERNAME,
+    PlatformFramework,
 )
 from esphome.core import CORE
 from esphome.types import ConfigType
@@ -175,3 +177,23 @@ async def to_code(config) -> None:
             [],
             conf,
         )
+
+FILTER_SOURCE_FILES = filter_source_files_from_platform(
+    {
+        "duco_esp32.cpp": {
+            PlatformFramework.ESP32_IDF,
+            PlatformFramework.ESP32_ARDUINO,
+        },
+        "mining_esp32.cpp": {
+            PlatformFramework.ESP32_IDF,
+            PlatformFramework.ESP32_ARDUINO,
+        },
+        
+        "duco_esp8266.cpp": {
+            PlatformFramework.ESP8266_ARDUINO
+        },
+        "mining_esp8266.cpp": {
+            PlatformFramework.ESP8266_ARDUINO
+        },
+    }
+)
