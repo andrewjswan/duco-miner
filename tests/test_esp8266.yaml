@@ -14,6 +14,7 @@ dashboard_import:
   package_import_url: github://andrewjswan/svitlobot/tests/test_esp8266.yaml@main
 
 external_components:
+  - id: !remove duco_component
   - source:
       type: local
       path: ../components
