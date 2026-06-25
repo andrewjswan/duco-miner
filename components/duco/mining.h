@@ -78,7 +78,7 @@ class MiningJob {
 
   void handleSystemEvents(void);
 
-  uint8_t *hexStringToUint8Array(const std::string &hexString, uint8_t *uint8Array, const uint32_t arrayLength);
+  uint8_t *hex_string_to_uint8_array(const std::string &hexString, uint8_t *uint8Array, const uint32_t arrayLength);
 
   void connectToNode();
   void waitForClientData();
