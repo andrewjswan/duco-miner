@@ -18,11 +18,6 @@ constexpr uint8_t base36CharValues[75] = {
 };
 // clang-format on
 
-#define SPC_TOKEN ' '
-#define END_TOKEN '\n'
-#define SEP_TOKEN ','
-#define IOT_TOKEN '@'
-
 MiningJob::MiningJob(uint8_t core, MiningConfig *config, Duco *parent) {
   this->core = core;
   this->config = config;
