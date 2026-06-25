@@ -3,6 +3,7 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import sensor
+from esphome.config_helpers import filter_source_files_from_platform
 from esphome.const import (
     CONF_ID,
     DEVICE_CLASS_DURATION,
@@ -10,6 +11,7 @@ from esphome.const import (
     STATE_CLASS_MEASUREMENT,
     UNIT_MILLISECOND,
     UNIT_PERCENT,
+    PlatformFramework,
 )
 
 from . import DucoComponent
@@ -110,3 +112,19 @@ async def to_code(config) -> None:
     if CONF_PING in config:
         sens = await sensor.new_sensor(config[CONF_PING])
         cg.add(parent.set_ping(sens))
+
+
+FILTER_SOURCE_FILES = filter_source_files_from_platform(
+    {
+        "duco_esp32.cpp": {PlatformFramework.ESP8266_ARDUINO},
+        "mining_esp32.cpp": {PlatformFramework.ESP8266_ARDUINO},
+        "duco_esp8266.cpp": {
+            PlatformFramework.ESP32_IDF,
+            PlatformFramework.ESP32_ARDUINO,
+        },
+        "mining_esp8266.cpp": {
+            PlatformFramework.ESP32_IDF,
+            PlatformFramework.ESP32_ARDUINO,
+        },
+    },
+)
