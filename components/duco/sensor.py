@@ -12,7 +12,7 @@ from esphome.const import (
     UNIT_PERCENT,
 )
 
-from . import DucoComponent, FILTER_SOURCE_FILES  # noqa: F401
+from . import FILTER_SOURCE_FILES, DucoComponent  # noqa: F401
 from .const import (
     CONF_ACCEPTED_RATE,
     CONF_ACCEPTED_SHARES,
