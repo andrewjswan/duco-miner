@@ -13,6 +13,12 @@ esp8266:
 dashboard_import:
   package_import_url: github://andrewjswan/svitlobot/tests/test_esp8266.yaml@main
 
+external_components:
+  - source:
+      type: local
+      path: components
+    components: [duco]
+
 packages:
   common: !include ../packages/common.yaml
   duco: !include ../packages/ducominer.yaml
