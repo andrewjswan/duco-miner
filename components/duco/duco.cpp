@@ -11,15 +11,6 @@
 #include <algorithm>
 #include <cctype>
 
-#if defined(USE_ESP32)
-#include <soc/soc_caps.h>
-#include <lwip/netdb.h>
-#endif
-
-#if defined(USE_ESP8266)
-#include "esphome/components/http_request/http_request.h"
-#endif
-
 namespace esphome::duco {
 
 #define CHECK_INTERVAL 60000
@@ -47,85 +38,6 @@ void Duco::on_ota_global_state(ota::OTAState state, float progress, uint8_t erro
   }
 }
 #endif
-
-void Duco::loop() {
-  this->update_sensors();
-
-  if (!network::is_connected()) {
-    this->configuration->is_ready = false;
-    return;
-  }
-
-  if ((this->username_ == nullptr || strlen(this->username_) == 0) ||
-      (this->worker_ == nullptr || strlen(this->worker_) == 0) ||
-      (this->key_ == nullptr || strlen(this->key_) == 0)) {
-    this->configuration->is_ready = false;
-    return;
-  }
-
-  uint32_t current_time = millis();
-  if (current_time - this->last_check_time_ >= CHECK_INTERVAL) {
-    this->last_check_time_ = current_time;
-    check_for_problem();
-  }
-
-#if defined(ESP8266)
-  if (this->configuration->is_ready && this->job[0] != nullptr) {
-    this->job[0]->mine();
-  }
-#endif
-
-  if (this->configuration->is_ready)
-    return;
-
-  if (this->last_fetch_time_ != 0 && (current_time - this->last_fetch_time_ < CHECK_INTERVAL)) {
-    return;
-  }
-  this->last_fetch_time_ = current_time;
-  this->fetch_pool_node();
-}
-
-void Duco::start() {
-  this->job[0] = new MiningJob(0, this->configuration, this);
-#if defined(USE_ESP32)
-  xTaskCreatePinnedToCore(Duco::duco_thread_entry, "Miner/0", 10000, (void *) this->job[0], 1, &this->miner1_handle, 0);
-
-#if (SOC_CPU_CORES_NUM >= 2)
-  this->job[1] = new MiningJob(1, this->configuration, this);
-  xTaskCreatePinnedToCore(Duco::duco_thread_entry, "Miner/1", 10000, (void *) this->job[1], 1, &this->miner2_handle, 1);
-#endif
-#endif
-
-  ESP_LOGCONFIG(TAG, "Duco started...");
-}  // start()
-
-void Duco::stop() {
-  if (this->configuration != nullptr) {
-    this->configuration->is_ready = false;
-  }
-
-#if defined(USE_ESP32)
-  if (this->miner1_handle != nullptr) {
-    vTaskDelete(this->miner1_handle);
-    this->miner1_handle = nullptr;
-  }
-#if (SOC_CPU_CORES_NUM >= 2)
-  if (this->miner2_handle != nullptr) {
-    vTaskDelete(this->miner2_handle);
-    this->miner2_handle = nullptr;
-  }
-#endif
-  vTaskDelay(pdMS_TO_TICKS(50));
-#elif defined(USE_ESP8266)
-  if (this->job[0] != nullptr) {
-    delete this->job[0];
-    this->job[0] = nullptr;
-  }
-  esphome::delay(50);
-#endif
-
-  ESP_LOGCONFIG(TAG, "Duco stopped.");
-}  // stop()
 
 void Duco::dump_config() {
   ESP_LOGCONFIG(TAG, "Duco version: %s", DUCO_VERSION);
@@ -156,8 +68,6 @@ void Duco::dump_config() {
 }  // dump_config()
 
 void Duco::update_config() {
-  // 1. Critical safety check: ensure the configuration structure itself is allocated.
-  // This completely eliminates any risk of Guru Meditation / Core Crash during boot cycles.
   if (this->configuration == nullptr) {
     ESP_LOGW(TAG, "Config sync aborted: 'configuration' is not initialized yet.");
     return;
@@ -165,8 +75,6 @@ void Duco::update_config() {
 
   bool changed = false;
 
-  // 2. Safe check and sync for Username
-  // Verify that the incoming raw web string pointer is valid and contains data
   if (this->username_ != nullptr && std::strlen(this->username_) > 0) {
     if (this->configuration->DUCO_USER != this->username_) {
       this->configuration->DUCO_USER = this->username_;
@@ -177,8 +85,6 @@ void Duco::update_config() {
     ESP_LOGD(TAG, "Config sync: Username is empty, keeping default.");
   }
 
-  // 3. Safe check and sync for Miner Key
-  // Key can be legally empty on some pools, so we only guard against bad memory addresses
   if (this->key_ != nullptr) {
     if (this->configuration->MINER_KEY != this->key_) {
       this->configuration->MINER_KEY = this->key_;
@@ -187,7 +93,6 @@ void Duco::update_config() {
     }
   }
 
-  // 4. Safe check and sync for Worker / Rig Identifier
   if (this->worker_ != nullptr && std::strlen(this->worker_) > 0) {
     if (this->configuration->RIG_IDENTIFIER != this->worker_) {
       this->configuration->RIG_IDENTIFIER = this->worker_;
@@ -198,31 +103,11 @@ void Duco::update_config() {
     ESP_LOGD(TAG, "Config sync: Worker is empty, keeping default.");
   }
 
-  // 5. Force miner socket session restart if any configuration parameter has mutated.
-  // This breaks the current TCP link and forces threads to trigger reconnect loops instantly.
   if (changed) {
     this->generate_identifier();
     this->configuration->is_ready = false;
   }
 }
-
-#if defined(USE_ESP32)
-void Duco::duco_thread_entry(void *params) {
-  if (params == nullptr) {
-    vTaskDelete(nullptr);
-    return;
-  }
-
-  MiningJob *current_job = static_cast<MiningJob *>(params);
-  ESP_LOGCONFIG(TAG, "[MINER] %d Started...", xPortGetCoreID());
-
-  for (;;) {
-    current_job->mine();
-  }  // for(;;)
-
-  vTaskDelete(NULL);
-}  // duco_function()
-#endif
 
 #ifdef USE_SENSOR
 std::string Duco::get_temperature_string() const {
@@ -246,225 +131,6 @@ std::string Duco::get_cputemp_string() const {
                                 this->cputemp_sensor_->get_unit_of_measurement_ref().c_str());
   }
   return "";
-}
-#endif
-
-#if defined(USE_ESP32)
-bool Duco::fetch_pool_node() {
-  ESP_LOGI(TAG, "Fetching active node from Poolpicker...");
-  this->configuration->is_ready = false;
-
-  struct addrinfo hints;
-  struct addrinfo *res = nullptr;
-  std::memset(&hints, 0, sizeof(hints));
-  hints.ai_family = AF_INET;
-  hints.ai_socktype = SOCK_STREAM;
-
-  const char *poolpicker_url = "server.duinocoin.com";
-  int16_t err = getaddrinfo(poolpicker_url, nullptr, &hints, &res);
-  if (err != 0 || res == nullptr) {
-    ESP_LOGW(TAG, "DNS Resolution failed for %s, error: %d", poolpicker_url, err);
-    if (res != nullptr) {
-      freeaddrinfo(res);
-    }
-    this->configuration->is_ready = false;
-    this->status_set_warning();
-    return false;
-  }
-
-  std::unique_ptr<esphome::socket::Socket> sock = esphome::socket::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-  if (sock == nullptr) {
-    ESP_LOGW(TAG, "Failed to create socket (errno: %d)", errno);
-    freeaddrinfo(res);
-    this->configuration->is_ready = false;
-    this->status_set_warning();
-    return false;
-  }
-
-  sock->setblocking(false);
-
-  struct sockaddr_in s_addr{};
-  s_addr.sin_family = AF_INET;
-  s_addr.sin_port = htons(80);
-  s_addr.sin_addr.s_addr = ((struct sockaddr_in *) res->ai_addr)->sin_addr.s_addr;
-
-  freeaddrinfo(res);
-
-  bool connected = false;
-  int16_t conn_res = sock->connect((struct sockaddr *) &s_addr, sizeof(s_addr));
-
-  if (conn_res == 0) {
-    ESP_LOGD(TAG, "Successfully connected to %s!", poolpicker_url);
-    connected = true;
-  } else if (conn_res < 0 && errno == EINPROGRESS) {
-    struct pollfd pfd;
-    pfd.fd = sock->get_fd();
-    pfd.events = POLLOUT;
-
-    int16_t ready = poll(&pfd, 1, 1500);
-    if (ready > 0) {
-      int16_t so_error;
-      socklen_t len = sizeof(so_error);
-      getsockopt(pfd.fd, SOL_SOCKET, SO_ERROR, &so_error, &len);
-
-      if (so_error == 0) {
-        ESP_LOGD(TAG, "Successfully connected via Poll to %s!", poolpicker_url);
-        connected = true;
-      } else {
-        ESP_LOGW(TAG, "Connection to %s Error after Poll: %d", poolpicker_url, so_error);
-      }
-    } else if (ready == 0) {
-      ESP_LOGW(TAG, "Connection to %s Connection timeout...", poolpicker_url);
-    } else {
-      ESP_LOGW(TAG, "Connection to %s Poll system error: %d", poolpicker_url, errno);
-    }
-  } else {
-    ESP_LOGW(TAG, "Connection to %s Failed immediately, errno: %d", poolpicker_url, errno);
-  }
-
-  if (!connected) {
-    sock.reset();
-    this->configuration->is_ready = false;
-    this->status_set_warning();
-    return false;
-  }
-
-  std::string http_request = "GET /getPool HTTP/1.1\r\n"
-                             "Host: server.duinocoin.com\r\n"
-                             "User-Agent: esphome/" +
-                             esphome::App.get_name() + " (" + DUCO_VERSION +
-                             ")\r\n"
-                             "Accept: application/json\r\n"
-                             "Connection: close\r\n\r\n";
-
-  if (sock->send(http_request.c_str(), http_request.length(), 0) < 0) {
-    ESP_LOGW(TAG, "Failed to send HTTP request payload");
-    sock.reset();
-    this->configuration->is_ready = false;
-    this->status_set_warning();
-    return false;
-  }
-
-  sock->setblocking(true);
-
-  struct timeval tv;
-  tv.tv_sec = 1;
-  tv.tv_usec = 500000;
-  sock->setsockopt(SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
-
-  std::string response;
-  char recv_buffer[128];
-  ssize_t bytes_received = 0;
-
-  while ((bytes_received = sock->read(recv_buffer, sizeof(recv_buffer) - 1)) > 0) {
-    response.append(recv_buffer, bytes_received);
-
-    if (response.length() >= 12 && response.find("HTTP/") == 0) {
-      if (response.find("HTTP/1.1 429") == 0) {
-        ESP_LOGE(TAG, "Rate limit exceeded!");
-        break;
-      }
-    }
-
-    if (response.length() > 3072) {
-      ESP_LOGE(TAG, "HTTP Response too large. Potential memory flood protected.");
-      break;
-    }
-  }
-  sock.reset();
-
-  size_t headers_end = response.find("\r\n\r\n");
-  if (headers_end == std::string::npos) {
-    headers_end = response.find("\n\n");
-  }
-  if (headers_end == std::string::npos) {
-    headers_end = 0;
-  }
-
-  size_t json_start = response.find('{', headers_end);
-  if (json_start == std::string::npos) {
-    ESP_LOGE(TAG, "Invalid HTTP response: Genuine JSON payload not found.");
-    this->configuration->is_ready = false;
-    this->status_set_warning();
-    return false;
-  }
-
-  std::string json_body = response.substr(json_start);
-  ESP_LOGD(TAG, "Extracted genuine JSON: %s", json_body.c_str());
-
-  bool parse_success = esphome::json::parse_json(json_body, [this](JsonObject root) -> bool {
-    if (root["ip"].is<JsonVariant>() && root["port"].is<JsonVariant>()) {
-      std::string pool_ip = root["ip"].as<std::string>();
-      uint16_t pool_port = root["port"].as<uint16_t>();
-      std::string pool_name = root["name"].is<JsonVariant>() ? root["name"].as<std::string>() : "DucoNode";
-
-      this->configuration->host = pool_ip;
-      this->configuration->port = pool_port;
-      this->configuration->node_id = pool_name;
-
-      ESP_LOGI(TAG, "Poolpicker successfully parsed! Target Node: %s -> %s:%d", pool_name.c_str(), pool_ip.c_str(),
-               pool_port);
-
-      this->configuration->is_ready = true;
-      this->status_clear_warning();
-      return true;
-    }
-    return false;
-  });
-
-  if (!parse_success) {
-    ESP_LOGE(TAG, "JSON fields validation failed. Schema mismatch.");
-    this->status_set_warning();
-  }
-
-  return parse_success;
-}
-#endif
-
-#if defined(USE_ESP8266)
-bool Duco::fetch_pool_node() {
-  ESP_LOGI(TAG, "Fetching active node from Poolpicker...");
-  this->configuration->is_ready = false;
-
-  if (this->http_request_comp_ == nullptr) {
-    ESP_LOGE(TAG, "http_request reference is missing.");
-    return false;
-  }
-
-  std::vector<esphome::http_request::Header> headers;
-  esphome::http_request::Header accept_header;
-  accept_header.name = "Accept";
-  accept_header.value = "application/json";
-  headers.push_back(accept_header);
-
-  std::string url = "https://server.duinocoin.com/getPool";
-  auto container = this->http_request_comp_->get(url, headers);
-  if (container == nullptr)
-    return false;
-
-  std::string json_body = "";
-  uint8_t recv_buffer[128];
-  int16_t bytes_read = 0;
-
-  while ((bytes_read = container->read(recv_buffer, sizeof(recv_buffer) - 1)) > 0) {
-    json_body.append(reinterpret_cast<char *>(recv_buffer), bytes_read);
-    if (json_body.length() > 3072)
-      return false;
-  }
-
-  if (json_body.empty())
-    return false;
-
-  return esphome::json::parse_json(json_body, [this](JsonObject root) -> bool {
-    if (root["ip"].is<JsonVariant>() && root["port"].is<JsonVariant>()) {
-      this->configuration->host = root["ip"].as<std::string>();
-      this->configuration->port = root["port"].as<uint16_t>();
-      this->configuration->node_id = root["name"].is<JsonVariant>() ? root["name"].as<std::string>() : "DucoNode";
-      this->configuration->is_ready = true;
-      return true;
-    }
-    return false;
-  });
 }
 #endif
 
@@ -497,129 +163,6 @@ void Duco::check_for_problem() {
   if (should_restart) {
     esphome::delay(1000);
     esphome::App.safe_reboot();
-  }
-}
-
-void Duco::update_sensors() {
-  uint32_t current_time = millis();
-#if defined(USE_ESP32)
-  bool is_system_ready = this->configuration->is_ready.load(std::memory_order_relaxed);
-#elif defined(USE_ESP8266)
-  bool is_system_ready = this->configuration->is_ready;
-#endif
-
-#ifdef USE_BINARY_SENSOR
-  if (this->status_ != nullptr && this->status_->state != is_system_ready) {
-    this->status_->publish_state(is_system_ready);
-  }
-#endif
-
-  if (this->last_sensor_update_ == 0 || (current_time - this->last_sensor_update_ >= UPDATE_INTERVAL)) {
-    this->last_sensor_update_ = current_time;
-
-#ifdef USE_TEXT_SENSOR
-    if (this->cores_status_ != nullptr) {
-      std::string current_cores_status = "";
-      current_cores_status.reserve(SOC_CPU_CORES_NUM);
-
-      for (uint8_t i = 0; i < SOC_CPU_CORES_NUM; i++) {
-        if (this->job[i] == nullptr) {
-          current_cores_status += "-";
-        } else if (this->job[i]->problem()) {
-          current_cores_status += "X";
-        } else {
-          current_cores_status += "*";
-        }
-      }
-      if (this->cores_status_->state != current_cores_status) {
-        this->cores_status_->publish_state(current_cores_status);
-      }
-    }
-#endif
-
-#ifdef USE_SENSOR
-    if (!is_system_ready) {
-      if (this->hashrate_ != nullptr && !std::isnan(this->hashrate_->state)) {
-        this->hashrate_->publish_state(NAN);
-      }
-      if (this->ping_ != nullptr && !std::isnan(this->ping_->state)) {
-        this->ping_->publish_state(NAN);
-      }
-      if (this->share_rate_ != nullptr && !std::isnan(this->share_rate_->state)) {
-        this->share_rate_->publish_state(NAN);
-      }
-      return;
-    }
-
-    uint32_t total_hashrate = 0U;
-    uint32_t total_accepted = 0U;
-    uint32_t total_shares_count = 0U;
-    uint32_t max_ping = 0U;
-    uint32_t current_diff = 0U;
-
-    for (uint8_t i = 0; i < SOC_CPU_CORES_NUM; i++) {
-      if (this->job[i] != nullptr) {
-#if defined(USE_ESP32)
-        total_hashrate += this->job[i]->hashrate.load(std::memory_order_relaxed);
-        total_accepted += this->job[i]->accepted_share_count.load(std::memory_order_relaxed);
-        total_shares_count += this->job[i]->share_count.load(std::memory_order_relaxed);
-
-        uint32_t j_ping = this->job[i]->ping.load(std::memory_order_relaxed);
-        if (j_ping > max_ping)
-          max_ping = j_ping;
-
-        if (current_diff == 0U) {
-          current_diff = this->job[i]->difficulty.load(std::memory_order_relaxed);
-        }
-#elif defined(USE_ESP8266)
-        total_hashrate += this->job[i]->hashrate;
-        total_accepted += this->job[i]->accepted_share_count;
-        total_shares_count += this->job[i]->share_count;
-
-        uint32_t j_ping = this->job[i]->ping;
-        if (j_ping > max_ping)
-          max_ping = j_ping;
-
-        if (current_diff == 0) {
-          current_diff = this->job[i]->difficulty;
-        }
-#endif
-      }
-    }
-
-    if (this->hashrate_ != nullptr) {
-      this->hashrate_->publish_state(static_cast<float>(total_hashrate) / 1000.0f);
-    }
-
-    if (this->ping_ != nullptr) {
-      this->ping_->publish_state(max_ping);
-    }
-
-    if (this->accepted_shares_ != nullptr) {
-      this->accepted_shares_->publish_state(total_accepted);
-    }
-    if (this->total_shares_ != nullptr) {
-      this->total_shares_->publish_state(total_shares_count);
-    }
-
-    if (this->difficulty_ != nullptr && this->difficulty_->state != current_diff) {
-      this->difficulty_->publish_state(current_diff);
-    }
-
-    if (this->accept_rate_ != nullptr && total_shares_count > 0) {
-      float a_rate = (static_cast<float>(total_accepted) / total_shares_count) * 100.0f;
-      this->accept_rate_->publish_state(a_rate);
-    }
-    if (this->share_rate_ != nullptr) {
-      float total_secs = static_cast<float>(millis()) / 1000.0f;
-      if (total_secs > 0.0f) {
-        float sharerate = static_cast<float>(total_shares_count) / total_secs;
-        this->share_rate_->publish_state(sharerate);
-      } else {
-        this->share_rate_->publish_state(0);
-      }
-    }
-#endif  // USE_SENSOR
   }
 }
 
