@@ -27,13 +27,7 @@ class MiningJob {
   ~MiningJob() { delete this->dsha1; }
 
   void mine();
-  bool problem() const {
-#if defined(USE_ESP32)
-    return this->errors.load(std::memory_order_relaxed) >= ERROR_THRESHOLD;
-#elif defined(USE_ESP8266)
-    return this->errors >= ERROR_THRESHOLD;
-#endif
-  }
+  bool problem() const;
 
 #if defined(USE_ESP32)
   std::atomic<uint32_t> hashrate{0};
