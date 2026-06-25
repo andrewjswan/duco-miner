@@ -16,7 +16,12 @@
 
 namespace esphome::duco {
 
-inline constexpr int8_t ERROR_THRESHOLD = 55;
+inline constexpr uint8_t ERROR_THRESHOLD = 55;
+
+inline constexpr char SPC_TOKEN = ' ';
+inline constexpr char END_TOKEN = '\n';
+inline constexpr char SEP_TOKEN = ',';
+inline constexpr char IOT_TOKEN = '@';
 
 struct MiningConfig;
 class Duco;
