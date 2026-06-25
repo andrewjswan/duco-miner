@@ -13,9 +13,6 @@
 
 namespace esphome::duco {
 
-#define CHECK_INTERVAL 60000
-#define UPDATE_INTERVAL 15000
-
 void Duco::setup() {
   ESP_LOGCONFIG(TAG, "Setting up Duco...");
 
