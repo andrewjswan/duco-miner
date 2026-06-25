@@ -67,11 +67,19 @@ void Duco::stop() {
   if (this->miner1_handle != nullptr) {
     vTaskDelete(this->miner1_handle);
     this->miner1_handle = nullptr;
+    if (this->job[0] != nullptr) {
+      delete this->job[0];
+      this->job[0] = nullptr;
+    }
   }
 #if (SOC_CPU_CORES_NUM >= 2)
   if (this->miner2_handle != nullptr) {
     vTaskDelete(this->miner2_handle);
     this->miner2_handle = nullptr;
+    if (this->job[1] != nullptr) {
+      delete this->job[1];
+      this->job[1] = nullptr;
+    }
   }
 #endif
   vTaskDelay(pdMS_TO_TICKS(50));
