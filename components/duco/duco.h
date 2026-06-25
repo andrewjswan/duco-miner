@@ -36,6 +36,9 @@ namespace esphome::duco {
 static const char *const TAG = "duco";
 static const char *const DUCO_VERSION = "2026.6.5";
 
+inline constexpr uint32_t CHECK_INTERVAL = 60000;
+inline constexpr uint32_t UPDATE_INTERVAL = 15000;
+
 struct MiningConfig {
   std::string DUCO_USER = "";
   std::string RIG_IDENTIFIER = "";
