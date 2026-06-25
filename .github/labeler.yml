@@ -2,7 +2,7 @@ critical:
   - '/(\s|^)(critical|urgent)(:|\s|$)/i'
 
 enhancement:
-  - '/(\s|^)(feat|features|request|new|improve|create|build|enhancement|rework|effects?)(:|\s|$)/i'
+  - '/(\s|^)(feat|features|request|new|improve|create|build|enhancement|rework)(:|\s|$)/i'
 
 bug:
   - '/(\s|^)(bug|fix|issue|solve|correct|defect)(:|\s|$)/i'
@@ -17,4 +17,7 @@ help wanted:
   - '/(\s|^)(help|need|info)(:|\s|$)/i'
 
 duco:
-  - '/(\s|^)(duco|duino|ducominer|duinomainer)(:|\s|$)/i'
+  - '/(\s|^)(duco|duino)(:|\s|$)/i'
+
+ducominer:
+  - '/(\s|^)(ducominer|duinomainer)(:|\s|$)/i'

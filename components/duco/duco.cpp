@@ -55,14 +55,14 @@ void Duco::loop() {
     this->configuration->is_ready = false;
     return;
   }
-  
+
   if ((this->username_ == nullptr || strlen(this->username_) == 0) ||
       (this->worker_ == nullptr || strlen(this->worker_) == 0) ||
       (this->key_ == nullptr || strlen(this->key_) == 0)) {
     this->configuration->is_ready = false;
     return;
   }
-  
+
   uint32_t current_time = millis();
   if (current_time - this->last_check_time_ >= CHECK_INTERVAL) {
     this->last_check_time_ = current_time;
@@ -222,6 +222,31 @@ void Duco::duco_thread_entry(void *params) {
 
   vTaskDelete(NULL);
 }  // duco_function()
+#endif
+
+#ifdef USE_SENSOR
+std::string Duco::get_temperature_string() const {
+  if (this->temperature_sensor_ != nullptr && this->temperature_sensor_->has_state()) {
+    return esphome::str_sprintf("Temp:%.1f%s", this->temperature_sensor_->get_state(),
+                                this->temperature_sensor_->get_unit_of_measurement_ref().c_str());
+  }
+  return "";
+}
+
+std::string Duco::get_humidity_string() const {
+  if (this->humidity_sensor_ != nullptr && this->humidity_sensor_->has_state()) {
+    return esphome::str_sprintf("Hum:%.0f%%", this->humidity_sensor_->get_state());
+  }
+  return "";
+}
+
+std::string Duco::get_cputemp_string() const {
+  if (this->cputemp_sensor_ != nullptr && this->cputemp_sensor_->has_state()) {
+    return esphome::str_sprintf("CPU Temp:%.1f%s", this->cputemp_sensor_->get_state(),
+                                this->cputemp_sensor_->get_unit_of_measurement_ref().c_str());
+  }
+  return "";
+}
 #endif
 
 #if defined(USE_ESP32)
