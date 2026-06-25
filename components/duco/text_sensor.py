@@ -3,14 +3,12 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import text_sensor
-from esphome.config_helpers import filter_source_files_from_platform
 from esphome.const import (
     CONF_ID,
     ENTITY_CATEGORY_DIAGNOSTIC,
-    PlatformFramework,
 )
 
-from . import DucoComponent
+from . import DucoComponent, FILTER_SOURCE_FILES
 from .const import (
     CONF_CORES_STATUS,
     CONF_POOL,
@@ -46,19 +44,3 @@ async def to_code(config) -> None:
     if CONF_CORES_STATUS in config:
         sens = await text_sensor.new_text_sensor(config[CONF_CORES_STATUS])
         cg.add(parent.set_cores_status(sens))
-
-
-FILTER_SOURCE_FILES = filter_source_files_from_platform(
-    {
-        "duco_esp32.cpp": {
-            PlatformFramework.ESP32_IDF,
-            PlatformFramework.ESP32_ARDUINO,
-        },
-        "mining_esp32.cpp": {
-            PlatformFramework.ESP32_IDF,
-            PlatformFramework.ESP32_ARDUINO,
-        },
-        "duco_esp8266.cpp": {PlatformFramework.ESP8266_ARDUINO},
-        "mining_esp8266.cpp": {PlatformFramework.ESP8266_ARDUINO},
-    },
-)
