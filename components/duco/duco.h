@@ -117,28 +117,9 @@ class Duco : public Component
   }
 
 #ifdef USE_SENSOR
-  std::string get_temperature_string() const {
-    if (this->temperature_sensor_ != nullptr && this->temperature_sensor_->has_state()) {
-      return esphome::str_sprintf("Temp:%.1f%s", this->temperature_sensor_->get_state(),
-                                  this->temperature_sensor_->get_unit_of_measurement_ref().c_str());
-    }
-    return "";
-  }
-
-  std::string get_humidity_string() const {
-    if (this->humidity_sensor_ != nullptr && this->humidity_sensor_->has_state()) {
-      return esphome::str_sprintf("Hum:%.0f%%", this->humidity_sensor_->get_state());
-    }
-    return "";
-  }
-
-  std::string get_cputemp_string() const {
-    if (this->cputemp_sensor_ != nullptr && this->cputemp_sensor_->has_state()) {
-      return esphome::str_sprintf("CPU Temp:%.1f%s", this->cputemp_sensor_->get_state(),
-                                  this->cputemp_sensor_->get_unit_of_measurement_ref().c_str());
-    }
-    return "";
-  }
+  std::string get_temperature_string() const;
+  std::string get_humidity_string() const;
+  std::string get_cputemp_string() const;
 #endif
 
  protected:
