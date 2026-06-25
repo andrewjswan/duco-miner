@@ -11,6 +11,12 @@ esp32:
 dashboard_import:
   package_import_url: github://andrewjswan/duco-mine/tests/test_esp32_espidf.yaml@main
 
+external_components:
+  - source:
+      type: local
+      path: components
+    components: [duco]
+
 packages:
   common: !include ../packages/common.yaml
   duco: !include ../packages/ducominer.yaml
