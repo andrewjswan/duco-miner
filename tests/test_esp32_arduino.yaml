@@ -12,6 +12,7 @@ dashboard_import:
   package_import_url: github://andrewjswan/duco-mine/tests/test_esp32_arduino.yaml@main
 
 external_components:
+  - id: !remove duco_component
   - source:
       type: local
       path: ../components
