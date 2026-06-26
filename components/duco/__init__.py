@@ -4,7 +4,6 @@ import logging
 
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.const import __version__ as ESPHOME_VERSION  # noqa: N812
 from esphome import automation
 from esphome.components import ota, sensor, socket
 from esphome.components.esp32 import (
@@ -29,6 +28,7 @@ from esphome.const import (
     CONF_ON_STATE,
     CONF_TEMPERATURE,
     CONF_USERNAME,
+    __version__ as ESPHOME_VERSION,  # noqa: N812
     PlatformFramework,
 )
 from esphome.core import CORE
