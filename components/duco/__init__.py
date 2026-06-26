@@ -186,7 +186,7 @@ async def to_code(config) -> None:
         logging.info(" [X] CPU Temperature sensor")
 
     if config[CONF_ESPHOME]:
-        cg.add_define("DUCO_ADD_ESPHOME_VERSION", ESPHOME_VERSION)
+        cg.add_define("DUCO_ADD_ESPHOME_VERSION", f"ESPHome:{ESPHOME_VERSION}")
         logging.info(" [X] ESPHome Version")
 
     await cg.register_component(var, config)
