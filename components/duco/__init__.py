@@ -28,8 +28,8 @@ from esphome.const import (
     CONF_ON_STATE,
     CONF_TEMPERATURE,
     CONF_USERNAME,
-    __version__ as ESPHOME_VERSION,  # noqa: N812
     PlatformFramework,
+    __version__ as ESPHOME_VERSION,  # noqa: N812
 )
 from esphome.core import CORE
 from esphome.types import ConfigType
