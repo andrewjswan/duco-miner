@@ -99,8 +99,8 @@
           name: "Current Pool"
     ```
 
-*[ESP32]: A series of “system-on-chip” microcontrollers from the Chinese manufacturer Espressif, featuring integrated Wi-Fi and Bluetooth controllers, low power consumption, and an affordable price.
-*[ESP8266]: A microcontroller from the Chinese manufacturer Espressif with a Wi-Fi interface. For example, the NodeMCU or Wemos D1 Mini.
+*[ESP32]: A series of `system-on-chip` microcontrollers from the Chinese manufacturer **Espressif**, featuring integrated Wi-Fi and Bluetooth controllers, low power consumption, and an affordable price.
+*[ESP8266]: A microcontroller from the Chinese manufacturer **Espressif** with a Wi-Fi interface. For example, the NodeMCU or Wemos D1 Mini.
 *[ID]: Quite an important aspect of ESPHome are `IDs`. They are used to connect components from different domains.
 *[boolean]: `true` or `false`
 *[string]: Strings are enclosed in double quotes (") or single quotes (').
