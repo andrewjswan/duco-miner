@@ -4,6 +4,7 @@ import logging
 
 import esphome.codegen as cg
 import esphome.config_validation as cv
+from esphome.const import __version__ as ESPHOME_VERSION
 from esphome import automation
 from esphome.components import ota, sensor, socket
 from esphome.components.esp32 import (
@@ -185,7 +186,7 @@ async def to_code(config) -> None:
         logging.info(" [X] CPU Temperature sensor")
 
     if config[CONF_ESPHOME]:
-        cg.add_define("DUCO_ADD_ESPHOME_VERSION")
+        cg.add_define("DUCO_ADD_ESPHOME_VERSION", ESPHOME_VERSION)
         logging.info(" [X] ESPHome Version")
 
     await cg.register_component(var, config)
