@@ -220,7 +220,16 @@ void MiningJob::askForJob() {
       job_req += (!temp_str.empty() || !hum_str.empty()) ? IOT_TOKEN : SEP_TOKEN;
       job_req += cpu_str;
     }
+#ifdef DUCO_ADD_ESPHOME_VERSION
+    job_req += job_req += (!temp_str.empty() || !hum_str.empty() || !cpu_str.empty()) ? IOT_TOKEN : SEP_TOKEN;
+    job_req += DUCO_ADD_ESPHOME_VERSION;
+#endif
   }
+#else
+#ifdef DUCO_ADD_ESPHOME_VERSION
+  job_req += SEP_TOKEN;
+  job_req += DUCO_ADD_ESPHOME_VERSION;
+#endif
 #endif
 
   job_req += END_TOKEN;
