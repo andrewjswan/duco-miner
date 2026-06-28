@@ -20,7 +20,6 @@ from esphome.components.esp32 import (
 from esphome.components.http_request import CONF_HTTP_REQUEST_ID
 from esphome.config_helpers import filter_source_files_from_platform
 from esphome.const import (
-    __version__ as ESPHOME_VERSION,  # noqa: N812
     CONF_ESPHOME,
     CONF_HUMIDITY,
     CONF_ID,
@@ -30,6 +29,9 @@ from esphome.const import (
     CONF_TEMPERATURE,
     CONF_USERNAME,
     PlatformFramework,
+)
+from esphome.const import (
+    __version__ as ESPHOME_VERSION,  # noqa: N812
 )
 from esphome.core import CORE
 from esphome.types import ConfigType
