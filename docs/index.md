@@ -20,3 +20,6 @@
 This repository provides a custom component for [ESPHome](https://esphome.io/) that allows you to easily turn **ESP32** and **ESP8266** microcontrollers into energy-efficient [Duino-Coin (DUCO)](https://duinocoin.com/) miners with with monitoring available through a **Web interface** or by integrating it directly into [Home Assistant](https://www.home-assistant.io/).
 
 **This repository features** fully prepared **YAML configuration files** and **ready-made configurations** for various devices, enabling you to launch your mining setup in just a few clicks. All management features, hashrate statistics, accepted share counters, and thread diagnostics automatically integrate into your smart home dashboard without requiring any complex code editing.
+
+*[ESP32]: A series of `system-on-chip` microcontrollers from the Chinese manufacturer **Espressif**, featuring integrated Wi-Fi and Bluetooth controllers, low power consumption, and an affordable price.
+*[ESP8266]: A microcontroller from the Chinese manufacturer **Espressif** with a Wi-Fi interface. For example, the NodeMCU or Wemos D1 Mini.

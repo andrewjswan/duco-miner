@@ -1,5 +1,8 @@
 ## Duco Miner Component
 
+!!! warning
+    ESP8266 supported but not tested.
+
 !!! example annotate "Duco Miner Component"
 
     ``` { .yaml .copy .annotate }
@@ -23,8 +26,18 @@
 !!! note "Mining key"
     Please note that the `mining key` is **not** your `password`. It's a separate passphrase that you set during registration (or set in the wallet).
 
-!!! warning
-    ESP8266 supported but not tested.
+!!! tip "Using Secrets"
+    Username, Key can be substituted using `Secrets` file `secrets.yaml`.
+
+    !!! example
+        ``` { .yaml .copy .annotate }
+        duco:
+          username: !secret my_duco_username
+          key: !secret my_duco_mining_key
+        ```
+
+!!! danger
+    In order to keep your secrets safe, the `secrets.yaml` file should NOT be checked into git or any other version control system.
 
 ### Parameters reference
 
@@ -34,13 +47,17 @@
 
 - **key** (required, string): Duino-Coin mining key.
 
-- **name** (optional, string): Custom miner name / identifier (leave blank for default).
+- **name** (optional, string): Custom miner name / identifier. Defaults to `Auto`.
 
-- **temperature** (optional, ID): Temperature sensor ID for transmission to the [Duino IoT](https://github.com/duino-coin/duino-coin/wiki/Duino's-take-on-the-Internet-of-Things)
+- **temperature** (optional, ID): Temperature sensor ID for transmission to the [Duino IoT](https://github.com/duino-coin/duino-coin/wiki/Duino's-take-on-the-Internet-of-Things).
 
-- **humidity** (optional, ID): Humidity Sensor ID for transmission to the [Duino IoT](https://github.com/duino-coin/duino-coin/wiki/Duino's-take-on-the-Internet-of-Things)
+- **humidity** (optional, ID): Humidity Sensor ID for transmission to the [Duino IoT](https://github.com/duino-coin/duino-coin/wiki/Duino's-take-on-the-Internet-of-Things).
 
-- **cpu_temperature** (optional, ID): CPU Temperature sensor ID for transmission to the [Duino IoT](https://github.com/duino-coin/duino-coin/wiki/Duino's-take-on-the-Internet-of-Things)
+- **cpu_temperature** (optional, ID): CPU Temperature sensor ID for transmission to the [Duino IoT](https://github.com/duino-coin/duino-coin/wiki/Duino's-take-on-the-Internet-of-Things).
+
+- **esphome** (optional, boolean): Add ESPHome version for transmission to the [Duino IoT](https://github.com/duino-coin/duino-coin/wiki/Duino's-take-on-the-Internet-of-Things). Defaults to `false`.
+
+- **enable_mimicry** (optional, boolean): Identify yourself to the server as an official client :material-information-outline:{ title="Like: Official ESP32 Miner" }. Defaults to `false`.
 
 ## Duco Sensors
 
@@ -81,3 +98,9 @@
         pool:
           name: "Current Pool"
     ```
+
+*[ESP32]: A series of `system-on-chip` microcontrollers from the Chinese manufacturer **Espressif**, featuring integrated Wi-Fi and Bluetooth controllers, low power consumption, and an affordable price.
+*[ESP8266]: A microcontroller from the Chinese manufacturer **Espressif** with a Wi-Fi interface. For example, the NodeMCU or Wemos D1 Mini.
+*[ID]: Quite an important aspect of ESPHome are `IDs`. They are used to connect components from different domains.
+*[boolean]: `true` or `false`
+*[string]: Strings are enclosed in double quotes (") or single quotes (').

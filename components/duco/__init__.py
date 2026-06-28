@@ -20,6 +20,7 @@ from esphome.components.esp32 import (
 from esphome.components.http_request import CONF_HTTP_REQUEST_ID
 from esphome.config_helpers import filter_source_files_from_platform
 from esphome.const import (
+    CONF_ESPHOME,
     CONF_HUMIDITY,
     CONF_ID,
     CONF_KEY,
@@ -28,6 +29,9 @@ from esphome.const import (
     CONF_TEMPERATURE,
     CONF_USERNAME,
     PlatformFramework,
+)
+from esphome.const import (
+    __version__ as ESPHOME_VERSION,  # noqa: N812
 )
 from esphome.core import CORE
 from esphome.types import ConfigType
@@ -90,6 +94,7 @@ BASE_SCHEMA = cv.Schema(
         cv.Optional(CONF_TEMPERATURE): cv.use_id(sensor),
         cv.Optional(CONF_HUMIDITY): cv.use_id(sensor),
         cv.Optional(CONF_CPU_TEMPERATURE): cv.use_id(sensor),
+        cv.Optional(CONF_ESPHOME, default=False): cv.boolean,
         cv.Optional(CONF_ENABLE_MIMICRY, default=False): cv.boolean,
         cv.Optional(CONF_ON_STATE): automation.validate_automation({}),
     },
@@ -181,6 +186,10 @@ async def to_code(config) -> None:
         cputemp = await cg.get_variable(config[CONF_CPU_TEMPERATURE])
         cg.add(var.set_cputemp_sensor(cputemp))
         logging.info(" [X] CPU Temperature sensor")
+
+    if config[CONF_ESPHOME]:
+        cg.add_define("DUCO_ADD_ESPHOME_VERSION", f"ESPHome:{ESPHOME_VERSION}")
+        logging.info(" [X] ESPHome Version")
 
     await cg.register_component(var, config)
 
