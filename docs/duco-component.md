@@ -99,6 +99,12 @@
           name: "Current Pool"
     ```
 
+!!! tip "Cores status"
+    * **~** - Task problem :material-information-outline:{ title="Only for ESP32" }
+    * **-** - Job problem
+    * **X** - A significant number of errors in the job tasks
+    * **\*** - No problem
+
 *[ESP32]: A series of `system-on-chip` microcontrollers from the Chinese manufacturer **Espressif**, featuring integrated Wi-Fi and Bluetooth controllers, low power consumption, and an affordable price.
 *[ESP8266]: A microcontroller from the Chinese manufacturer **Espressif** with a Wi-Fi interface. For example, the NodeMCU or Wemos D1 Mini.
 *[ID]: Quite an important aspect of ESPHome are `IDs`. They are used to connect components from different domains.
