@@ -49,11 +49,11 @@ void Duco::loop() {
 
 void Duco::start() {
   this->job[0] = new MiningJob(0, this->configuration, this);
-  xTaskCreatePinnedToCore(Duco::duco_thread_entry, "Miner/0", 10000, (void *) this->job[0], 1, &this->miner1_handle, 0);
+  xTaskCreatePinnedToCore(Duco::duco_thread_entry, "Miner/0", 10000, (void *) this->job[0], 1, &this->miner_handles[0], 0);
 
 #if (SOC_CPU_CORES_NUM >= 2)
   this->job[1] = new MiningJob(1, this->configuration, this);
-  xTaskCreatePinnedToCore(Duco::duco_thread_entry, "Miner/1", 10000, (void *) this->job[1], 1, &this->miner2_handle, 1);
+  xTaskCreatePinnedToCore(Duco::duco_thread_entry, "Miner/1", 10000, (void *) this->job[1], 1, &this->miner_handles[1], 1);
 #endif
 
   ESP_LOGCONFIG(TAG, "Duco started...");
@@ -64,18 +64,18 @@ void Duco::stop() {
     this->configuration->is_ready = false;
   }
 
-  if (this->miner1_handle != nullptr) {
-    vTaskDelete(this->miner1_handle);
-    this->miner1_handle = nullptr;
+  if (this->miner_handles[0] != nullptr) {
+    vTaskDelete(this->miner_handles[0]);
+    this->miner_handles[0] = nullptr;
     if (this->job[0] != nullptr) {
       delete this->job[0];
       this->job[0] = nullptr;
     }
   }
 #if (SOC_CPU_CORES_NUM >= 2)
-  if (this->miner2_handle != nullptr) {
-    vTaskDelete(this->miner2_handle);
-    this->miner2_handle = nullptr;
+  if (this->miner_handles[1] != nullptr) {
+    vTaskDelete(this->miner_handles[1]);
+    this->miner_handles[1] = nullptr;
     if (this->job[1] != nullptr) {
       delete this->job[1];
       this->job[1] = nullptr;
