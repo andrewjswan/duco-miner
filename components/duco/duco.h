@@ -135,12 +135,11 @@ class Duco : public Component
   uint32_t last_sensor_update_{0};
 
 #if defined(USE_ESP32)
-  TaskHandle_t miner1_handle{nullptr};
-  TaskHandle_t miner2_handle{nullptr};
+  TaskHandle_t miner_handles[SOC_CPU_CORES_NUM]{nullptr};
 #endif
 
   MiningConfig *configuration{nullptr};
-  MiningJob *job[SOC_CPU_CORES_NUM];
+  MiningJob *job[SOC_CPU_CORES_NUM]{nullptr};
 
 #ifdef USE_SENSOR
   sensor::Sensor *temperature_sensor_{nullptr};
