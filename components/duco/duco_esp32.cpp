@@ -292,7 +292,14 @@ void Duco::update_sensors() {
       current_cores_status.reserve(SOC_CPU_CORES_NUM);
 
       for (uint8_t i = 0; i < SOC_CPU_CORES_NUM; i++) {
-        if (this->job[i] == nullptr) {
+        bool core_state_problem = false;
+        if (this->miner_handles[i] != nullptr) {
+          eTaskState state = eTaskGetState(this->miner_handles[i]);
+          core_state_problem = (state == eDeleted || state == eInvalid);
+        }
+        if (core_state_problem) {
+          current_cores_status += "~";
+        } else if (this->job[i] == nullptr) {
           current_cores_status += "-";
         } else if (this->job[i]->problem()) {
           current_cores_status += "X";
