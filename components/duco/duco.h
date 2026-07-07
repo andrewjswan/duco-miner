@@ -71,11 +71,14 @@ class Duco : public Component
   void loop() override;
 
   void dump_config() override;
-  void update_config();
 
   void set_username(const char *username) { this->username_ = username; }
   void set_key(const char *key) { this->key_ = key; }
   void set_worker(const char *worker) { this->worker_ = worker; }
+
+#ifdef USE_WEBSERVER
+  void sync_web_config(const std::string &web_user, const std::string &web_key, const std::string &web_worker);
+#endif
 
 #ifdef USE_SENSOR
   void set_temperature_sensor(sensor::Sensor *temperature_sensor) { this->temperature_sensor_ = temperature_sensor; }

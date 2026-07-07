@@ -16,12 +16,7 @@ text:
     on_value:
       then:
         - lambda: |-
-            if (!x.empty()) {
-              id(miner).set_username(x.c_str());
-              id(miner).update_config();
-            } else {
-              ESP_LOGD("duco", "Web UI: Username is empty, change ignored.");
-            }
+            id(miner).sync_web_config(id(duco_username_text).state, id(duco_key_text).state, id(duco_worker_text).state);
 
   - platform: template
     name: "Miner Key"
@@ -40,12 +35,7 @@ text:
     on_value:
       then:
         - lambda: |-
-            if (!x.empty()) {
-              id(miner).set_key(x.c_str());
-              id(miner).update_config();
-            } else {
-              ESP_LOGD("duco", "Web UI: Key is empty, change ignored.");
-            }
+            id(miner).sync_web_config(id(duco_username_text).state, id(duco_key_text).state, id(duco_worker_text).state);
 
   - platform: template
     name: "Miner Name"
@@ -64,30 +54,4 @@ text:
     on_value:
       then:
         - lambda: |-
-            if (!x.empty()) {
-              id(miner).set_worker(x.c_str());
-              id(miner).update_config();
-            } else {
-              ESP_LOGD("duco", "Web UI: Miner Name is empty, change ignored.");
-            }
-
-esphome:
-  on_boot:
-    priority: -100.0
-    then:
-      - delay: 5s
-      - lambda: |-
-          std::string stored_user = id(duco_username_text).state;
-          std::string stored_key = id(duco_key_text).state;
-          std::string stored_worker = id(duco_worker_text).state;
-
-          if (!stored_user.empty()) {
-            id(miner).set_username(stored_user.c_str());
-          }
-          if (!stored_key.empty()) {
-            id(miner).set_key(stored_key.c_str());
-          }
-          if (!stored_worker.empty()) {
-            id(miner).set_worker(stored_worker.c_str());
-          }
-          id(miner).update_config();
+            id(miner).sync_web_config(id(duco_username_text).state, id(duco_key_text).state, id(duco_worker_text).state);

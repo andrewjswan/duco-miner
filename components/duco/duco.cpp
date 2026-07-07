@@ -64,7 +64,8 @@ void Duco::dump_config() {
 #endif
 }  // dump_config()
 
-void Duco::update_config() {
+#ifdef USE_WEBSERVER
+void Duco::sync_web_config(const std::string &web_user, const std::string &web_key, const std::string &web_worker) {
   if (this->configuration == nullptr) {
     ESP_LOGW(TAG, "Config sync aborted: 'configuration' is not initialized yet.");
     return;
@@ -72,39 +73,35 @@ void Duco::update_config() {
 
   bool changed = false;
 
-  if (this->username_ != nullptr && std::strlen(this->username_) > 0) {
-    if (this->configuration->DUCO_USER != this->username_) {
-      this->configuration->DUCO_USER = this->username_;
+  if (!web_user.empty()) {
+    if (this->configuration->DUCO_USER != web_user) {
+      this->configuration->DUCO_USER = web_user;
       changed = true;
-      ESP_LOGI(TAG, "Config synced: Username set to %s", this->username_);
-    }
-  } else {
-    ESP_LOGD(TAG, "Config sync: Username is empty, keeping default.");
-  }
-
-  if (this->key_ != nullptr) {
-    if (this->configuration->MINER_KEY != this->key_) {
-      this->configuration->MINER_KEY = this->key_;
-      changed = true;
-      ESP_LOGI(TAG, "Config synced: Miner Key updated.");
+      ESP_LOGI(TAG, "Config synced via Web UI: Username set to %s", web_user.c_str());
     }
   }
 
-  if (this->worker_ != nullptr && std::strlen(this->worker_) > 0) {
-    if (this->configuration->RIG_IDENTIFIER != this->worker_) {
-      this->configuration->RIG_IDENTIFIER = this->worker_;
+  if (this->configuration->MINER_KEY != web_key) {
+    this->configuration->MINER_KEY = web_key;
+    changed = true;
+    ESP_LOGI(TAG, "Config synced via Web UI: Miner Key updated.");
+  }
+
+  if (!web_worker.empty()) {
+    if (this->configuration->RIG_IDENTIFIER != web_worker) {
+      this->configuration->RIG_IDENTIFIER = web_worker;
       changed = true;
-      ESP_LOGI(TAG, "Config synced: Worker set to %s", this->worker_);
+      ESP_LOGI(TAG, "Config synced via Web UI: Worker set to %s", web_worker.c_str());
     }
-  } else {
-    ESP_LOGD(TAG, "Config sync: Worker is empty, keeping default.");
   }
 
   if (changed) {
+    ESP_LOGI(TAG, "Configuration changed! Applying new credentials and reconnecting...");
     this->generate_identifier();
     this->configuration->is_ready = false;
   }
-}
+}  // sync_web_config()
+#endif
 
 #ifdef USE_SENSOR
 std::string Duco::get_temperature_string() const {
