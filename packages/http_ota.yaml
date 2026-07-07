@@ -18,7 +18,7 @@ update:
   - platform: http_request
     id: new_firmware
     name: "Firmware Update"
-    source: https://andrewjswan.github.io/duco-miner/${path}${name}-manifest.json
+    source: https://andrewjswan.github.io/duco-miner/${path}manifest.json
     icon: mdi:update
     update_interval: 3h
     web_server:
