@@ -84,7 +84,9 @@ esphome:
           if (!stored_user.empty()) {
             id(miner).set_username(stored_user.c_str());
           }
-          id(miner).set_key(stored_key.c_str());
+          if (!stored_key.empty()) {
+            id(miner).set_key(stored_key.c_str());
+          }
           if (!stored_worker.empty()) {
             id(miner).set_worker(stored_worker.c_str());
           }
