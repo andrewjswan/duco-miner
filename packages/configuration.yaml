@@ -58,7 +58,7 @@ text:
 
 esphome:
   on_boot:
-    priority: -100.0
+    priority: 500.0
     then:
       - delay: 5s
       - lambda: |-
