@@ -67,7 +67,7 @@ void Duco::dump_config() {
 #ifdef USE_WEBSERVER
 void Duco::sync_web_config(const std::string &web_user, const std::string &web_key, const std::string &web_worker) {
   if (this->configuration == nullptr) {
-    ESP_LOGW(TAG, "Config sync aborted: 'configuration' is not initialized yet.");
+    ESP_LOGD(TAG, "Config sync aborted: 'configuration' is not initialized yet.");
     return;
   }
 
