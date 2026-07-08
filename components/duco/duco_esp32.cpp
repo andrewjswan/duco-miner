@@ -24,9 +24,8 @@ void Duco::loop() {
     return;
   }
 
-  if ((this->username_ == nullptr || strlen(this->username_) == 0) ||
-      (this->worker_ == nullptr || strlen(this->worker_) == 0) ||
-      (this->key_ == nullptr || strlen(this->key_) == 0)) {
+  if (this->configuration->DUCO_USER.empty() || 
+      this->configuration->RIG_IDENTIFIER.empty()) {
     this->configuration->is_ready = false;
     return;
   }
