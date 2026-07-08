@@ -24,11 +24,13 @@ void Duco::loop() {
     return;
   }
 
+#ifdef USE_WEBSERVER
   if (this->configuration->DUCO_USER.empty() || 
       this->configuration->RIG_IDENTIFIER.empty()) {
     this->configuration->is_ready = false;
     return;
   }
+#endif
 
   uint32_t current_time = millis();
   if (current_time - this->last_check_time_ >= CHECK_INTERVAL) {
