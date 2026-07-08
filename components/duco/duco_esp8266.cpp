@@ -22,12 +22,13 @@ void Duco::loop() {
     return;
   }
 
-  if ((this->username_ == nullptr || strlen(this->username_) == 0) ||
-      (this->worker_ == nullptr || strlen(this->worker_) == 0) ||
-      (this->key_ == nullptr || strlen(this->key_) == 0)) {
+#ifdef USE_WEBSERVER
+  if (this->configuration->DUCO_USER.empty() || 
+      this->configuration->RIG_IDENTIFIER.empty()) {
     this->configuration->is_ready = false;
     return;
   }
+#endif
 
   uint32_t current_time = millis();
   if (current_time - this->last_check_time_ >= CHECK_INTERVAL) {
