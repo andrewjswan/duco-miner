@@ -24,4 +24,6 @@
 
 If you like the project, you can support it with a star ⭐ on GitHub.
 
+## 📝 Changelog
+
 **Full Changelog**: https://github.com/andrewjswan/svitlobot/commits/v1.5.5
