@@ -25,7 +25,7 @@ void Duco::loop() {
   }
 
 #ifdef USE_WEBSERVER
-  if (this->configuration->DUCO_USER.empty() || 
+  if (this->configuration->DUCO_USER.empty() ||
       this->configuration->RIG_IDENTIFIER.empty()) {
     this->configuration->is_ready = false;
     return;
