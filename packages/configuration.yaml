@@ -58,8 +58,8 @@ text:
 
 esphome:
   on_boot:
-    priority: 500.0
-    then:
-      - delay: 5s
-      - lambda: |-
-          id(miner).sync_web_config(id(duco_username_text).state, id(duco_key_text).state, id(duco_worker_text).state);
+    - priority: 500.0
+      then:
+        - delay: 5s
+        - lambda: |-
+            id(miner).sync_web_config(id(duco_username_text).state, id(duco_key_text).state, id(duco_worker_text).state);
