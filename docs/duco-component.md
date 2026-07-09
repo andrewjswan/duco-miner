@@ -1,7 +1,10 @@
 ## Duco Miner Component
 
-!!! warning
-    ESP8266 supported but not tested.
+!!! warning "Performance Impact on ESP8266"
+    Due to the single-core architecture and hardware limitations of the ESP8266, running the Duino-Coin miner can significantly increase the response time (latency) of other components.
+
+    Since mining is CPU-intensive and shares a single execution thread, functions like web server handling, sensor updates, or Wi-Fi commands may experience noticeable delays.
+    For a smoother multi-tasking experience, consider using an ESP32.
 
 !!! example annotate "Duco Miner Component"
 
