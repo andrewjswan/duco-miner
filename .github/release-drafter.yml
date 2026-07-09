@@ -1,4 +1,4 @@
-name-template: v$RESOLVED_VERSION: DucoMiner
+name-template: "v$RESOLVED_VERSION: DucoMiner"
 tag-template: v$RESOLVED_VERSION
 exclude-contributors:
   - github-actions[bot]
