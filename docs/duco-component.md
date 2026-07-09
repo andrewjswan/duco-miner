@@ -1,3 +1,8 @@
+---
+title: Duco Component Configuration
+description: Advanced configuration guide for the custom DUCO component. Integrate hashrate stats, accepted shares, and diagnostic sensors into Home Assistant.
+---
+
 ## Duco Miner Component
 
 !!! warning
