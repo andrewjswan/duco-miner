@@ -284,6 +284,15 @@ void Duco::update_sensors() {
   }
 #endif
 
+#ifdef USE_TEXT_SENSOR
+  if (this->pool_ != nullptr) {
+    std::string current_pool = is_system_ready ? this->configuration->host : "";
+    if (this->pool_->state != current_pool) {
+      this->pool_->publish_state(current_pool);
+    }
+  }
+#endif
+
   if (this->last_sensor_update_ == 0 || (current_time - this->last_sensor_update_ >= UPDATE_INTERVAL)) {
     this->last_sensor_update_ = current_time;
 
