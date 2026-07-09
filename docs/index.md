@@ -1,4 +1,9 @@
-﻿# ESPHome Duino-Coin (DUCO) Miner
+﻿---
+title: ESPHome Duino-Coin Miner Docs
+description: Official documentation for ESPHome duco-miner. Easily transform your ESP32 or ESP8266 microcontrollers into energy-efficient Duino-Coin (DUCO) miners.
+---
+
+# ESPHome Duino-Coin (DUCO) Miner
 
 [![duco-miner_badge](https://img.shields.io/badge/Duco-Miner-orange?logo=dash&logoColor=white)](https://duinocoin.com/)
 [![esp8266_arduino](https://img.shields.io/badge/ESP8266-Arduino-darkcyan.svg)](https://esphome.io/)
